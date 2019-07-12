@@ -6,7 +6,7 @@ telegram 에서 가장 밑에 Window/,Mac/Linux 클릭 후 다운
 
 
 
-![](![capture42](https://user-images.githubusercontent.com/52684457/61094703-2df5be80-a48b-11e9-96ac-a138417210f4.PNG)
+![capture42](https://user-images.githubusercontent.com/52684457/61094703-2df5be80-a48b-11e9-96ac-a138417210f4.PNG)
 
 **@BotFather** 사용자를 찾기
 
@@ -222,6 +222,20 @@ request.get의 get과 .get은 **다름**
 
 
 #### 네이버 파파고를 이용한 번역 Telegram
+
+네이버 개발자 센터를 이용한다.
+
+- papago API 사용 신청을 한 후, 특정 코드 값을 받는다. => 여기에도 **개인정보**
+
+- 어떻게 사용해야 할지에 대한 내용이 담겨있다.
+
+- NAVER_CLIENT_SECRET 번호는 한번만 발급이 되므로, 잃어버리면 재 발급 해야함
+
+  
+
+![](https://user-images.githubusercontent.com/52684457/61110131-80ea6880-a4c1-11e9-8b1a-61ba99b8f2fa.png)
+
+
 
 ```python
 from flask import Flask, render_template, request 

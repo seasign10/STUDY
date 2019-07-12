@@ -25,7 +25,7 @@ https://core.telegram.org/bots/api#authorizing-your-bot
 
 페이지 내 아래에  정해진 메써드 네임이 있으니 잘 적용하면 됨.
 
-![](https://user-images.githubusercontent.com/52684457/61094706-2e8e5500-a48b-11e9-9a06-39115326c743.png)
+![](https://user-images.githubusercontent.com/52684457/61110794-176b5980-a4c3-11e9-884a-2a9464cc7dc1.png)
 
 ```
 https://api.telegram.org/bot나의_토큰_값/getMe

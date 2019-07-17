@@ -289,9 +289,11 @@ def telegram():
     return '', 200
 ```
 
+
+
 'h'e'l'l'o'
 
-0 1 2 3 4 5 
+0 1 2 3 4 5  => 이렇게 하나하나 순서의 단위를 인덱스라고 한다.
 
 **A[0:2]** == 'hello' :
 
@@ -302,6 +304,10 @@ def telegram():
 3 이후로의 모든 텍스트를 불러온다.
 
 => llo
+
+
+
+![](https://user-images.githubusercontent.com/52684457/61356794-15820b80-a8b2-11e9-9e18-dda074c83536.PNG)
 
 ###### json 코드 정리
 

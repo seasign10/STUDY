@@ -351,7 +351,8 @@ NAVER_CLIENT_SECRET='naver_client_secret'
         bonus_num = lotto['bnusNo']
         text = f'로또 {num} 회차의 당첨 번호는 {winner}입니다. 보너스 번호는 {bonus_num}입니다.'
 
-
+#.append => 리스트를 확장(추가)시키는 것.
+#.get => dict에서 요청해서 가져오는 것
 
 
         # requests.get은 한 줄만 써주면 된다. 명령을 늘리고 싶으면 위의 if문을 복사해서 추가하면 됨

@@ -116,6 +116,13 @@ https://api.telegram.org/bot<token>/setWebhook?url=<ngrok-forwarding-http-url>/<
 
 매번 켤 때 마다 바뀌니 서버를 연동중이라면 명령 프롬프트를 끄지 않는 것이 좋다.
 
+```python
+from decouple import config
+token = config('TELEGRAM_BOT_TOKEN')
+
+=>.env 파일 작성 이후에 이런 값을 입력해야 보안이 필요한 TELEGRAM_BOT_TOKEN이 직접적으로 넘어가지 않는다.
+```
+
 
 
 ```python

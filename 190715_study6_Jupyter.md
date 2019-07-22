@@ -32,6 +32,12 @@ $ git pull => 강사님이 올린 자료 받기
 > - ctrl + s 저장
 > - m 기본값이 파이썬으로 되어있는 셀을 마크다운으로 바꿔줌.
 
+이미지 넣기
+
+```py
+<img src="이미지 URL">
+```
+
 
 
 
@@ -105,8 +111,11 @@ $ git pull => 강사님이 올린 자료 받기
 >  ```
 >```
 >
+>```
+>
 >- ```
->jupyter contrib nbextension install --user
+>  jupyter contrib nbextension install --user
+>  ```
 >```
 >
 >이 둘을 설치 한 후 쥬피터를 실행,
@@ -114,6 +123,7 @@ $ git pull => 강사님이 올린 자료 받기
 >![1563160098053](https://user-images.githubusercontent.com/52684457/61194128-8c74a400-a6fa-11e9-8671-db604879e88b.PNG)
 >
 >위와 같이 설정하면 쥬피터 파일 왼쪽에 목록이 생긴다.
+>```
 
 그리고 쥬피터를 저장 할 때마다 저장 데이터가 쌓이는데, 지저분하지 않게 gitignore.io 에서 쥬피터 노트북을 검색 해서 .gitignore 생성 해준다. 이미 .gitignore에 쥬피터가 기입되어있으면 중복해서 쓰지 않도록 조심하자.
 

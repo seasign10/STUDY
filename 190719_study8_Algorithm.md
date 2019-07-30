@@ -348,7 +348,7 @@ n-1 부터 n-1만큼 역순으로 카운트를 감소시키며 반복하면. . .
 data = [0, 4, 1, 3, 1, 2, 4, 1]
 
 # 1 count 하기
-counts = [0] * 5 # 최대값 = 4 / 인덱스 0부터 4까지 
+counts = [0] * 5 # 최대값 = 4 / 인덱스 0부터 4까지 (최대 숫자가 리스트안에 4이기 때문.)
 for val in data:
     counts[val] += 1
     
@@ -375,6 +375,12 @@ for i in range(1, len(counts)):
 ![](https://user-images.githubusercontent.com/52684457/62025960-962afb00-b214-11e9-8a59-1aefee011cbd.png)
 
 첫 번째 for문은 n번 돌고 두번째 for문은 k번 마지막 for문도 n번
+
+
+
+###### 아래 연습문제 #3에서의 베이비진에서 count를 풀어 쓴 식이 있음.
+
+
 
 ------
 
@@ -450,6 +456,57 @@ for i in range(n):
 
 
 
+![](https://user-images.githubusercontent.com/52684457/62093154-24ee5500-b2b3-11e9-8d12-2d97256d86f5.png)
+
+```python
+'''
+위의 
+for i in range(6):
+    c[num % 10] += 1
+    num //=10
+에서 range(6)이 붙은 이유는 자릿수가 6자릿 수인것을 이미 알기 때문.
+'''
+
+num = 123456
+
+arr = []
+# %, /
+
+# 몇 자리인지 길이를 모를 때 num > 0
+while num > 0:
+    arr.append(num % 10)
+    num //=  10 # 10을 나눈 몫을 저장
+
+print(arr)
+```
+
+
+
+
+
+#### :green_book: <연습 문제 # 3>
+
+건물 조망권 확보하기 위한 세대 구하기
+
+[https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV134DPqAA8CFAYh&probBoxId=AWw8otLKmRUDFAUD+&type=PROBLEM&problemBoxTitle=01.List%287%EC%9B%9429%EC%9D%BC%29&problemBoxCnt=++1+](https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV134DPqAA8CFAYh&probBoxId=AWw8otLKmRUDFAUD+&type=PROBLEM&problemBoxTitle=01.List(7월29일)&problemBoxCnt=++1+)
+
+```python
+for n in range(10):
+    N = int(input())
+    num = list(map(int, input.split())) # input된 숫자를 공백()기준으로 나눠서 list
+    
+    result = 0
+    for i in range(2, N-2): # (2, N-2) => 양 옆의 2칸은 사용하지 못함.
+        MAX = max(num[i - 2], num[i - 1], num[i + 1], num[i + 2])
+        if MAX < num[i]: # 만약 두번째로 채택할 빌딩이 가장 큰 빌딩보다 작다면...
+            result += num[i] - MAX
+            # 가장 높은 빌딩과 두번째로 높은 빌딩의 차이를 구해 전망권이 확보되는 곳을 구함
+            
+    print('#{} {}'.format(n+1,result))
+```
+
+
+
 
 
 ------
@@ -461,9 +518,31 @@ for i in range(n):
   -  Brute-force는 야수의 힘 - 컴퓨터의 계산 성능이 굉장히 좋은 것(빠름)을 말함
 - **모든 경우의 수를 테스트한 후**, 최종 해법을 도출
 - 일반적으로 **경우의 수가 상대적으로 작을 때** 유용
-
 - 모든 경우의 수를 생성하고 테스트하기 때문에 **수행 속도는 느리지만**, 해답을 찾아내지 못할 확률이 작다. (=> 즉 찾아낼 확률 높음)
 - 자격 검정평가 등에서 주어진 문제를 풀 때, 우선 완전 검색으로 접근하여 해답을 도출한 후, 개선을 위해 다른 알고리즘을 사용하고 해답을 확인하는 것이 바람직하다.
+
+
+
+##### 최적화 문제의 기본 해결 방법 (=완전 검색)
+
+- 최대 혹은 최소가 되는 경우를 찾는 문제
+
+- 모든 가능한 경우를 조사한다.
+
+- 모든 후보해를 조사한다.
+
+- 모든 가능한 경우들이 조합과 관련이 깊다.
+
+  - 순열, 부분집합, 조합 (n!, 2^n)
+
+  
+
+##### 완전 검색을 좀 더 효율적으로 하는 방법 (아래의 방법 둘 전부 완전 검색 중 하나.)
+
+1. 백트래킹 (가지치기) - 선택을 되돌릴 수 있는 것, 이전 상태로 돌아와서 다른 선택을 함.
+2. 동적 계획법(memoization)
+
+
 
 ![](https://user-images.githubusercontent.com/52684457/62035045-08f2a100-b22a-11e9-8dae-dc556b3b5790.png)
 
@@ -471,12 +550,27 @@ for i in range(n):
 
 #### :closed_book:탐욕(Greedy) 알고리즘
 
-- 탐욕 알고리즘은 최적해를 구하는 데 사용되는 근시안적인 방법
-- 여러 경우 중 하나를 결정해야 할 때마다 그 순간에 최적이라고 생각되는 것을 선택해 나가는 방식으로 진행하여 최종적인 해답에 도달
-- 각 선택의 시점에서 이루어지는 결정은 지역적으로는 최적이지만, 그 선택들을 계속 수짖ㅂㅈ하여 최종적인 해답을 만들었다고 하여, 그것이 최적이라는 보장은 X
+- 탐욕 알고리즘은 **최적해를 구하는 데 사용**되는 **근시안적**인 방법
+  (근시안적 : 앞일이나 사물 전체를 파악하지 못하고 눈앞의 부분적인 현상에 사로잡힌)
+- **여러 경우 중 하나를 결정해야 할 때마다 그 순간에 최적이라고 생각되는 것을 선택해 나가는 방식**으로 진행하여 최종적인 해답에 도달
+- 각 선택의 시점에서 이루어지는 결정은 지역적으로는 최적이지만, 그 선택들을 계속 수집하여 최종적인 해답을 만들었다고 하여, 그것이 최적이라는 보장은 X
 - 일반적으로, 머릿속에 떠오르는 생각을 검증 없이 바로 구현하면 Greedy 접근이 된다.
+- **완전 검색을 하지 않고** 원하는 답을 찾기 빠르다. (하지만 대부분 사용하기가 **어렵다**.)
+- 백트래킹과는 다르게 한가지 선택을 고수하며 따라간다.
 
 
+
+##### 동작 과정
+
+1. 해 선택 : 현재 상태에서 부분 문제의 최적 해를 구한 뒤, 이를 부분해 집합(Solution Set)에 추가
+2. 실행 가능성 검사 : 새로운 부분해 집합이 실행 가능한지 확인
+   곧, 문제의 제약 조건을 위반하지 않는지를 검사
+3. 해 검사 : 새로운 부분해 집합이 문제의 해가 되는지를 확인
+   아직 전체 문제의 해가 완성되지 않았다면 1.의 해 선택부터 다시 시작
+
+
+
+#### :closed_book:분할 정복(Divide and Conquer)
 
 
 

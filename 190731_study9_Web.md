@@ -67,7 +67,9 @@
 
 
 
-#### :page_facing_up:HTML
+### :page_facing_up:HTML
+
+- HTML은 정보와 구조화 
 
 1. 들여쓰기는 공백 2문자를 사용
 
@@ -103,6 +105,8 @@
 **Ctrl + Alt + 위, 아래 방향키** : 동시에 여러줄 작성
 
 **Ctrl + Alt + 오른쪽 키** : 멀티창으로 빼냄
+
+##### <~~>을 전부다 쓸 필요 없이 바로 div, span ..쓰고 바로 Enter 이나 Tab 을 치면 된다.
 
 
 
@@ -460,3 +464,898 @@
 <input type="radio" ><br> => 올바른 예
 ```
 
+
+
+### :page_facing_up:CSS (cascading)
+
+- styling의 정의 
+  - css또한 프로그래밍이 아니며 각자 문법이 다른 별개의 언어 하지만HTML이 없으면 무의미, 독자적이지 않음
+  - 대게 마지막에 온 코드가 적용 순위가 높지만, 종류에 따라 다름. (css는 떨어진다는 의미가 있음. 가장 아래에 있는 코드가 적용됨)
+
+###### CSS 활용하기
+
+1. Inline(인라인)
+2. Embedding(내부참조)
+3. Link file(외부참조)
+
+- 1, 2, 3번 순으로 적용 순위가 강함
+  - 그래서 1번을 잘 사용하지 않는다. 다만 강조하고 싶거나 변경되지않기를 원하거나 특수한 경우일 때에만 사용 한다.
+  - 컴포넌트화 - 일반적으로 외부파일로서 css를 활용함으로서 모듈화를 선호하기 때문에 3번이 가장 선호된다.
+
+```html
+<!-- intro.html -->
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="00_intro.css">
+  <style>
+    h2 {
+      color: rgb(255, 195, 138);
+    }
+  </style>
+</head>
+
+<body>
+  <h1 style="color: rgb(231, 166, 166);">inline css 적용</h1>
+  <h2>내부참조, embedding</h2>
+  <h3>외부참조, file link</h3>
+
+</body>
+
+</html>
+```
+
+```css
+<!-- intro.css -->
+
+h3 {
+  color: salmon;
+}
+```
+
+
+
+#### 프로퍼티 값의 단위
+
+1. ##### 키워드
+
+2. ##### 크기단위 
+
+   1. (px / 디바이스별로 픽셀의 크기는 제각각 ) => 절대 단위가 아님
+   2. %는 백분율 단위의 상대단위. 상대적인 사이즈를 설정.
+   3. em 은 배수 단위로 상대 단위이다.(상속의 영향으로 값이 달라질 수 있음) rem은 최상위 요소(html)의 사이즈를 기준으로 삼는다. rem의 r은 root를 의미
+   4. Viewport 단위 디바이스마다 다른 크기의 화면을 가지고 있기 때문에 상대적인 단위인 뷰포트를 기준으로 만들어짐 IE지원이 완전하지 않으므로 주의가 필요.
+
+   ```html
+   <!DOCTYPE html>
+   <html lang="ko">
+   
+   <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+     <title>Unit</title>
+     <link rel="stylesheet" href="01_unit.css">
+   </head>
+   
+   <body>
+     <h1>단위를 알아보자</h1>
+     <p>Default font</p>
+    <!-- rem => 24px : 20 * 1.2 -->
+     <ol>
+       <li>1.2rem</li>
+     </ol>
+   <!-- em => 28.8px : 20* 1.2 * 1.2 -->
+     <ul>
+       <li>1.2em</li>
+     </ul>
+   
+     <!-- vw, vh -->
+     <span class="vw">10vw</span>
+     <span class="vh">10vh</span>
+     <div class="div-vw"></div>
+     <div class="div-vh"></div>
+   
+     <!-- vmin -->
+     <div class="div-vmin">10vmin</div>
+   </body>
+   
+   </html>
+   ```
+
+   ```css
+   html {
+     font-size: 20px;
+   }
+   
+   ol,
+   ol li {
+     font-size: 1.2rem;
+   }
+   
+   ul
+   ul, li {
+     font-size: 1.2em;
+   }
+   
+   .vw {
+     font-size: 10vw;
+   }
+   
+   .vh {
+     font-size: 10vh;
+   }
+   
+   .div-vw {
+     width: 10vw;
+     height: 10vw;
+     background-color: crimson;
+   }
+   
+   .div-vh {
+     width: 10vh;
+     height: 10vh;
+     background-color: royalblue;
+   }
+   
+   .div-vmin {
+     width: 10vmin;
+     height: 10vmin;
+     background-color: greenyellow;
+   }
+   ```
+
+   
+
+3. ##### 색상표현 단위
+
+`!import` **>** 인라인 스타일 **>** 클래스 선택자 **>** 아이디 선택자 **>** 클래스 선택자 **>** 태그 선택자 **>** 전체 선택자
+
+아이디는 중복으로 사용하는게 아닌, 하나만 쓰는 것이 원칙. 클래스 선택자는 가능하다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="02_selector.css">
+</head>
+<body>
+  <p>빨간색</p>
+  <h1>태그 선택자</h1>
+  <h2 class="pink">클래스 선택자</h2>
+  <h3 id="green">아이디 선택자</h3>
+  <h3 id="green" class="pink">아이디 > 클래스</h3>
+  <h1 class="pink">클래스 > 태그</h1>
+
+  <!-- span 태그와 div 태그는 모두 의미는 없지만 '마크업'을 해야
+  css를 적용시킬 수 있기 때문에 활용된다. 특정한 곳을 지정해야하고 따라서 선택자가
+  필요하게 되고 선택자를 잡기 위해서는 마크업이 필요한 것이다. -->
+  <p><span class="pink">핑크핑크,</span><span id="green"> 초록초록</span></p>
+
+  <!-- 클래스는 공백을 기준으로 각각 클래스가 나뉨 -->
+  <!-- 아래처럼 pink 가 마지막에 써졌지만, css 코드상으로 yellow가 마지막에 선언되었기
+  때문에 노란색으로 적용된다. -->
+  <p class="bold yellow pink">노랑노랑</p>
+
+  <p class="bold yellow pink" id="orange" style="color: purple;">가장 강한 우선수위</p>
+</body>
+</html>
+```
+
+```css
+/* 전체 선택자 */
+* {
+  color: red;
+}
+
+/* 태그 선택자 */
+h1 {
+  color: blue;
+}
+
+/* 클래스 선택자 */
+.pink {
+  color: pink;
+}
+
+/* 아이디 선택자 */
+#green {
+  color: green;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.yellow {
+  color: yellow;
+}
+
+#orange {
+  color: brown !important;
+  color: orange;
+}
+```
+
+- ###### \<el>:nth-child(n)
+
+  - el 태그의 부모의 자식들 중, n번째 자식이 el 이라면 선택! (잘 사용하지 않음)
+
+    p: => p라면 실행 됨. 아닌 경우 선택하지 않음.
+
+- ###### \<el>:nth-of-type(n)
+
+  - el 태그 부모의 자식들 중 el 인 것들 중에서 n번째를 선택! (조금 더 직관적)
+
+    
+
+#### :baby_chick:CSS 스타일 가이드
+
+1. 들여쓰기 2문자
+2. 클래스, 아이디명은 케밥 케이스(kebob-case)를 사용한다.
+3. 다중 선택 시 한줄에 선택자를 하나씩 작성
+
+```css
+.bold,
+.yellow,
+.bold {
+  font-weight: bold;
+}
+```
+
+4. 모든 스타일 뒤에는 세미콜론을 붙인다.
+
+5. ##### 스타일 지정 시 아이디, 태그 대신에 클래스를 사용한다. (되도록, 대부분)
+
+6. 숫자 0 이후에는 불필요한 단위를 작성하지 않는다.
+
+7. @import 대신 \<link>  방법을 사용한다.
+
+8. 가능한 한 단축어(축약형)를 사용한다. (단, 불필요하게 과용하는 것을 피한다.)
+
+( https://ui.toast.com/fe-guide/ko/ 기준 )
+
+
+
+
+
+```html
+<body>
+  <!-- 그룹 선택자 -->
+  <p>그룹 선택자</p>
+  <h3>그룹 선택자</h3>
+  <p>그룹</p>
+  <p>그룹</p>
+
+  <!-- 인접 선택자 -->
+  <div class="red"></div>
+  <div class="blue"></div>
+  <div></div>
+
+  <!-- 자식 선택자 -->
+  <ol>
+    <li>ol 자식 li</li>
+  </ol>
+  <ol id="chocolate">
+    <li>허쉬</li>
+    <li>드림카카오</li>
+    <li>쿠엔크</li>
+  </ol>
+
+  <!-- 자손(후손) 선택자 -->
+  <!-- 박스는 왜 생겨요? - css의 위의 div 때문에, -->
+  <ul>
+    <div>
+      <li>자손</li>
+      <li>자손</li>
+      <li>자손</li>
+    </div>
+  </ul>
+
+</body>
+```
+
+```css
+/* 그룹 선택자 */
+p,
+h3 {
+  color: gray;
+}
+
+/* div 세팅 */
+div {
+  width: 100px;
+  height: 100px;
+  border: 1px solid black;
+}
+
+.red {
+  background-color: red;
+}
+
+.blue {
+  background-color: blue;
+}
+
+/* 인접 선택자, 바로 붙어있음 */
+.red + .blue + div {
+  background-color: purple;
+}
+
+/* 자식 선택자 인덴트 한칸 차이만 읽을 수 있다.*/
+ol > li {
+  color: darkgreen;
+}
+
+ol#chocolate > li {
+  color: chocolate;
+}
+
+/* 자손(후손) 선택자 */
+ul li {
+  color: lime;
+}
+```
+
+
+
+#### :baby_chick:기본 박스모델 활용 
+
+###### top을 10px => top에 10px만큼의 공간을 준다는 의미. (위로 10xp옮겨간다는 뜻이 X)
+
+![](https://user-images.githubusercontent.com/52684457/62263051-cad9c500-b455-11e9-82e5-085125efeb51.png)
+
+> ###### 개수에 따른 적용 순서
+>
+> 상하좌우 : 1개
+>
+> 상하 > 좌우 : 2개
+>
+> 상 > 좌우 > 하 : 3개
+>
+> 상 > 우 > 하 > 좌 :4개
+
+##### emmet 
+
+- https://docs.emmet.io/abbreviations/syntax/
+- https://docs.emmet.io/cheat-sheet/
+
+
+
+![](https://user-images.githubusercontent.com/52684457/62263258-771bab80-b456-11e9-8026-1cd33cc1f0bb.png)
+
+개발자 확장자 (F12)를 사용하여 자세한 정보를 보거나 코드를 수정해서 바로바로 확인 할 수 잇다.
+
+- 하지만 새로고침(F5)을 사용하면 원래대로 돌아오는 형식
+
+
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="04_box_model.css">
+</head>
+<body>
+  <!-- div>ol>li*3 + Tab -->
+  <!-- div#apge>(header>ul.first>li.item$$@3{hi,there}*5>a{link})+footer>p>lorem10 -->
+  <!-- lorem10 - 10글자를 생성 -->
+  <div>div</div>
+  <!-- .margin.padding == div.margin.padding -->
+  <div class="margin padding">margin</div>
+  <!-- div는 오른쪽 끝공간을 다 잡아먹고 있음, span은 아님. -->
+  <div class="padding">padding</div>
+  <div class="border">border</div>
+
+  <!-- .margin-shorthand-$@1*4 -->
+  <div class="margin-shorthand-1"></div>
+  <div class="margin-shorthand-2"></div>
+  <div class="margin-shorthand-3"></div>
+  <div class="margin-shorthand-4"></div>
+
+  <!-- .ailing-center -->
+  <div class="aling-center"></div>
+  <div class="aling-right"></div>
+
+
+</body>
+</html>
+```
+
+```css
+div {
+  color: white;
+  width: 100px;
+  height: 100px;
+  background-color: gray;
+}
+
+.margin {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.padding {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.border {
+  border-width: 5px;
+  border-style: dotted;
+  border-color: red;
+  border-top-color: blue;
+  border-radius: 10px;
+  /* border: 5px dotted red; */
+}
+
+.margin-shorthand-1 {
+  /* 상하좌우 */
+  margin: 10px;
+}
+
+.margin-shorthand-2 {
+  /* 상하 > 좌우 */
+  margin: 10px 20px;
+}
+
+.margin-shorthand-3 {
+  /* 상 > 좌우 > 하 */
+  margin: 10px 20px 30px;
+}
+
+.margin-shorthand-4 {
+  /* 상 > 우 > 하 > 좌 */
+  margin: 10px 20px 30px 40;
+}
+
+/* 마진 상쇄 => 위 아래 마진px이 겹치면서 10px + 10px = 20px이 아니라,
+위아래 마진이 겹치면서 10px 그대로 나타나는 것. */
+
+
+
+
+/* 가운데 정렬 */
+.aling-center {
+  /* 오른쪽, 왼쪽에 반반 나눠준다. 0인 경우에는 단위를 안 써주는 것이 좋다.*/
+  margin: 0 auto;
+}
+
+/* 오른쪽 정렬 */
+.aling-right {
+  /* 오른쪽으로 남은 너비를 왼쪽으로 보낸다. (붙인다.) */
+  /* 왼쪽에 남은 너비를 붙인다. 오른쪽에있던 공간을 왼쪽으로 넘겨버리는 것. */
+  margin-left: auto;
+}
+
+```
+
+![](https://user-images.githubusercontent.com/52684457/62263045-c7463e00-b455-11e9-8ce0-21bba5eb3ada.png)
+
+```html
+ <div class="box-sizing content-box">
+    <p>content-box</p>
+  </div>
+  <div class="box-sizing border-box">
+    <p>border-box</p>
+  </div>
+```
+
+```css
+/* box-sizing */
+
+.box-sizing {
+  margin: 20px;
+  padding: 20px;
+  border: 10px solid red;
+  width: 300px;
+}
+
+.content-box {
+  box-sizing: content-box;
+
+}
+
+.border-box {
+  box-sizing: border-box;
+}
+```
+
+###### 대게 보더박스로 설정을 한 후 개발을 하는 경우가 많음.
+
+
+
+> ###### block
+>
+> 항상 새로운 라인에서 시작한다.
+>
+> 화면 크기 전체의 가로폭을 차지한다.  *width : 100%*
+>
+> 너비가 정해지면 나머지를 margin으로 처리한다.
+>
+> 
+>
+> ###### inline
+>
+> 새로운 라인에서 시작하지 않으며 문장의 중간에 들어갈 수 있다.
+>
+> content의 너비만큼 가로폭을 차지한다.
+>
+> 프로퍼티를 지정할 수 없는 치명적인 부분이 있지만 상, 하 여백은 line-height로 설정할 수 있다.
+>
+> 
+>
+> ###### inline-block
+>
+> 인라인의 너비를 조정할 수 없는 단점을 보안하여 블락과 인라인 레벨 요소의 특징을 모두 갖는다.
+>
+> 한줄에 표시 되면서 블럭의 속사을 모두 사용할 수 있다.
+>
+> 
+>
+> ###### None
+>
+> 해당 요솔르 화면에 표시하지 않는다. ( <u>공간조차 사라진다.</u> ) => 공간을 가린다는 개념이 X
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="05_display.css">
+</head>
+
+<body>
+
+  <!-- block -->
+  <h1>display</h1>
+  <h2>block</h2>
+  <p>display: block은
+    기본적으로 가질 수 있는 영역의
+    100%를 갖는다!</p>
+  <p>h1~6, p, div, form, table, ol, ul, li...</p>
+  <div>block</div>
+  <form action="">폼을 작성해 주세요.</form>
+
+  <!-- block 가로정렬 -->
+  <div class="ml-auto">ml-auto</div>
+  <div class="mr-auto">mr-auto</div>
+  <div class="mx-auto">mx-auto</div>
+
+  <!-- inline -->
+  <h2>inline</h2>
+  <span class="red">inline은 content 영역만큼</span>
+  <span>너비를 가진다.</span>
+  <input type="text">
+  <input type="date" name="" id="">
+  <a href="#">링크</a>
+  <img src="#" alt="img">
+
+</body>
+
+</html>
+```
+
+```css
+div {
+  width: 100px;
+  height: 100px;
+  background-color: crimson;
+  color: white;
+  line-height: 100px;
+  text-align: center;
+}
+
+/* 오른쪽 정렬 */
+.ml-auto {
+  /* 왼쪽에 남은 너비를 붙인다. */
+  margin-left: auto;
+}
+
+/* 왼쪽 정렬 */
+.mr-auto {
+  margin-right: auto;
+}
+
+/* 가운데 정렬 */
+.mx-auto {
+  margin: 0 auto;
+}
+
+.red {
+  color: red;
+}
+```
+
+- visible
+  - hidden - 해당 요소를 안 보이게 할뿐 사라지는 것은 아니다. (영향을 주지 않음.)
+
+###### 숫자 0 이후에는 불필요한 단위를 작성하지 않는다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="06_display.css">
+</head>
+
+<body>
+  <div>block</div>
+  <div>block</div>
+
+  <!-- inline -->
+  <!-- 내용없이 존재 할 수 없음.
+  (width, height 적용불가) -->
+  <div class="inline">안녕하세요??</div>
+  <div class="inline">저는 내용영역이 필요해요!</div>
+
+
+  <!-- inline-block -->
+  <!-- block 속성(width, height)
+  + inline 속성 (우측 margin이 사라짐) -->
+  <div class="inline-block">i-b</div>
+  <div class="inline-block">i-b</div>
+
+  <!-- display: none; 공간조차 사라짐
+  visibility: hidden 공간은 유지 -->
+<div>div</div>
+<div class="none">none</div>
+<div class="hidden">hidden</div>
+<div>div</div>
+
+<!-- opacity 요소의 투명도를 정한다. -->
+<div class="opacity">div</div>
+
+
+
+
+</body>
+
+</html>
+```
+
+```css
+div {
+  width: 100px;
+  height: 100px;
+  color: white;
+  background-color: crimson;
+  text-align: center;
+  line-height: 100px;
+}
+
+.inline {
+  display: inline;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.none {
+  display: none;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.opacity {
+  opacity: 0.5;
+}
+```
+
+
+
+
+
+#### Background
+
+고화질 사진 참고 사이트 : https://unsplash.com/
+
+- 이 외 :
+
+  https://www.pexels.com/
+  https://pixabay.com/
+  https://web.500px.com/
+  http://gratisography.com/
+  https://www.splitshire.com/
+  https://littlevisuals.co/
+  https://nos.twnsnd.co/
+  https://magdeleine.co/browse/ 
+
+구글에서 **css reset** 검색 => 완전 백지상태에서 css를 만지는 방법의 코드 (기본값들을 완전히 초기화)
+
+
+
+> ######  cover 
+>
+> - 배경이미지의 크기 비율을 유지한 상태에서 부모 요소의 sidth, height중 큰 값에 배경 이미지는 맞춘다. 따라서 이미지의 일부가 보이지 않을 수 있다.
+>
+> ###### contain
+>
+> - 배경이미지의 크기 비율을 유지한 상태에서 부모 요소의 영역에 배경이미지가 보이지 않는 부분까지 전체가 들어갈 수 있도록 이미지 크기를 조절한다.
+>
+> ###### attachment: fixed
+>
+> - 화면이 스크롤 되더라도 배경 이미지는 스크롤 되지 않고 고정시킨다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="07_background.css">
+</head>
+
+<body>
+ 
+  <div class="bg-box"></div>
+  
+</body>
+
+</html>
+```
+
+```css
+*,
+*:after,
+*:before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+/* 위는 기본 셋팅 무시 */
+.bg-box {
+  height: 100%;
+
+  /* background-image */
+  background-image: url("images/image.jpg");
+
+  /* background-size */
+  /* background-size: 700px 500px; */
+  background-size: cover;
+  /* background-size: contain; */
+
+  /* background-repeat */
+  background-repeat: no-repeat;
+  
+  background-position: 0, 0;
+  background-position: center;
+
+  /* background-attachment */
+  background-attachment: fixed;
+}
+```
+
+
+
+폰트 공유 : https://fonts.google.com/?subset=korean
+
+###### @import 대신 \<link>  방법을 사용한다. 그리고 영어 font를 제공하는것이 더 많다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="08_font_text.css">
+  <link href="https://fonts.googleapis.com/css?family=Song+Myung&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <p>default font size: 16px</p>
+  <!-- p.font-$@1{This is font $@1}*5 -->
+  <p class="font-1">This is font 1</p>
+  <p class="font-2">This is font 2</p>
+  <p class="font-3">This is font 3</p>
+  <p class="font-4">This is font 4</p>
+  <p class="font-5">This is font 5</p>
+
+  <div class="box">
+    <p>PYTHON</p>
+  </div>
+  
+  <p class="web-font">가나다라마바사</p>
+
+
+
+  
+</body>
+</html>
+```
+
+```css
+.font-1 {
+  font-size: 30px;
+  font-family: 'Courier New', Courier, monospace;
+  font-style: italic;
+}
+
+.font-2 {
+  font-size: 2rem;
+  font-family: 'Times New Roman', Times, serif;
+  font-weight: lighter;
+}
+
+.font-3 {
+  font-size: 130%;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: bold;
+}
+
+.font-4 {
+  font-size: small;
+  font-weight: 700;
+}
+
+.font-5 {
+  /* font shorthand */
+  /* font: font-style font-weight line-height font-size(필수) font-family(필수) */
+  font: italic 2rem "Hack";
+
+}
+
+.box {
+  width: 100px;
+  height: 100px;
+  background-color: crimson;
+  color: white;
+}
+
+.box > p {
+  text-align: center;
+  /* line-height를 부모의 height 만큼 주면
+  텍스트를 수직 중앙 정렬 하기에 용이하다. (단, 텍스트가 한 줄인 경우에) */
+  line-height: 100px
+}
+
+.web-font {
+  font-family: 'Song Myung', serif;
+}
+```
+
+
+
+![](https://user-images.githubusercontent.com/52684457/62271905-c07af380-b474-11e9-9699-a23222c5334b.PNG)
+
+Korean을 설정해주어야 제대로 작동하는 경우가 많다.

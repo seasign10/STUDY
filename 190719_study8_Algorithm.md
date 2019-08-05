@@ -783,7 +783,13 @@ for x in range(N): # 모든 행에 대해서
 
 ![](https://user-images.githubusercontent.com/52684457/62435403-025ab100-b777-11e9-8a2e-442b6167daad.png)
 
-![](https://user-images.githubusercontent.com/52684457/62435404-025ab100-b777-11e9-9005-55c06ec0de7f.png)
+
+
+![](https://user-images.githubusercontent.com/52684457/62450561-8593fb00-b7a7-11e9-846f-59f228f2cac9.png)
+
+
+
+- 사선의 수 = N + M - 1, 즉, 사선의 시작 좌표가 **N + M - 1** 개 존재한다.
 
 ```python
 # 대각 탐색

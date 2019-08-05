@@ -1264,6 +1264,12 @@ body {
 }
 ```
 
+>   background-size: cover;
+>
+>   background-position: center;
+>
+> - 배경을 넣을 때 기본적으로 입력하면 깔끔하게 나오는 코드.
+
 
 
 폰트 공유 : https://fonts.google.com/?subset=korean

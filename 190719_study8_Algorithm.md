@@ -37,9 +37,7 @@
 
 
 
-------
-
-
+## :closed_lock_with_key:배열(Array) 1
 
 :bookmark: (명) **알고리즘** : 유한한 단계를 통해 문제를 해결하기 위한 절차나 방법이다.
                          주로 컴퓨터용어로 쓰이며, **컴퓨터가 어떤 일을 수행하기 위한 단계적 방법.**
@@ -386,7 +384,7 @@ for i in range(1, len(counts)):
 
 
 
-#### :green_book: <연습 문제 # 1>
+#### :green_book: <연습 문제 # 1> : 낙차 구하기
 
 ![](https://user-images.githubusercontent.com/52684457/62027023-9aa4e300-b217-11e9-92e5-da81cf5cd291.png)
 
@@ -397,9 +395,7 @@ data = [7, 4, 2, 0, 0, 6, 0, 7, 0]
 
 
 
-#### :green_book: <연습 문제 # 2>
-
-baby - gin game
+#### :green_book: <연습 문제 # 2> : baby - gin game
 
 ![](https://user-images.githubusercontent.com/52684457/62028156-8f06eb80-b21a-11e9-82f7-54feb1fb2edc.png)
 
@@ -484,9 +480,7 @@ print(arr)
 
 
 
-#### :green_book: <연습 문제 # 3>
-
-건물 조망권 확보하기 위한 세대 구하기
+#### :green_book: <연습 문제 # 3> : 건물 조망권 확보하기 위한 세대 구하기
 
 [https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV134DPqAA8CFAYh&probBoxId=AWw8otLKmRUDFAUD+&type=PROBLEM&problemBoxTitle=01.List%287%EC%9B%9429%EC%9D%BC%29&problemBoxCnt=++1+](https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV134DPqAA8CFAYh&probBoxId=AWw8otLKmRUDFAUD+&type=PROBLEM&problemBoxTitle=01.List(7월29일)&problemBoxCnt=++1+)
 
@@ -503,6 +497,127 @@ for n in range(10):
             # 가장 높은 빌딩과 두번째로 높은 빌딩의 차이를 구해 전망권이 확보되는 곳을 구함
             
     print('#{} {}'.format(n+1,result))
+```
+
+
+
+#### :green_book: <연습 문제 # 4> : 덤프 최소 차 구하기
+
+[https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV139KOaABgCFAYh&probBoxId=AWxAewhK4FQDFAUD&type=PROBLEM&problemBoxTitle=01.List%287%EC%9B%9430%EC%9D%BC%29&problemBoxCnt=1](https://swexpertacademy.com/main/talk/solvingClub/problemView.do?solveclubId=AWw8otLKmRQDFAUD&contestProbId=AV139KOaABgCFAYh&probBoxId=AWxAewhK4FQDFAUD&type=PROBLEM&problemBoxTitle=01.List(7월30일)&problemBoxCnt=1)
+
+가장 낮은 상자는 0에서부터 세었을 때 0이아닌 가장 작은수,
+가장 높은 상자는 10에서 부터 내려갔을 때 0 이아닌 가장 큰 수로 계산
+
+```python
+for test_case in range(1, 11):
+    dump = int(input())
+    arr = list(map(int, input().split()))
+    
+    cnt = [0] * 101 # 빈도수 저장하는 List
+    for val in arr:
+        cnt[val] += 1
+        
+        minIdx, maxIdx = 0, 100
+        i = 0
+        while i < dump:
+            while cnt[minIdx] == 0:
+                minIdx += 1
+            while cnt[maxIdx] == 0:
+                maxIdx -= 1
+                
+            cnt[minIdx] -= 1
+            cnt[minIdx + 1] += 1
+            cnt[maxIdx] -= 1
+            cnt[maxIdx - 1] += 1
+            i += 1
+
+if cnt[minIdx] == 0: minIdx += 1
+if cnt[maxIdx] == 0: maxIdx -= 1
+```
+
+
+
+#### :green_book: <연습 문제 # 5> : 구간합
+
+https://swexpertacademy.com/
+
+learn - course - programming - intermediate - List1
+
+![](https://user-images.githubusercontent.com/52684457/62432048-40040d80-b768-11e9-81b6-7dfccb0342ad.png)
+
+```python
+T = int(input())
+for k in range(T):
+    N, M = map(int, input().split())
+    n_list = list(map(int, input().split()))
+
+for i in range(M):
+    MAX += n_list[i]
+    MIN += n_list[i]
+    MAX = MIN = SUM
+
+for i in range(1, N-M+1):  # i는 구간의 시작위치
+    crt = 0
+    for j in range(i, i+M):
+        crt += n_list[j]
+        
+    if MAX < crt:
+        MAX = crt
+    if MIN > crt:
+        MIN = crt
+
+    print( '#{} {}'.format(k+1, MAX-MIN))
+```
+
+##### 해결방법2)
+
+![](https://user-images.githubusercontent.com/52684457/62432049-40040d80-b768-11e9-82b0-d22c131082d0.png)
+
+슬라이딩 윈도우(Sliding Window): 배열의 연속적인 구간(sub-array, 윈도우)을 왼쪽에서 오른쪽으로 움직이면서 문제를 해결하는 방법
+
+```python
+T = int(input())
+
+for test_case in range(1, T+1):
+    N, M = map(int, input().split())
+    arr = list(map(int, input().split()))
+    
+    Sum = 0
+    for i in range(M):
+        Sum += arr[i]
+        
+    Min = Max = Sum
+    for i in range(N - M + 1):
+        Sum += (arr[i+M] = arr[i])
+        Min = min(Min, Sum)
+        Max = max(Max, Sum)
+        
+    print("#%d %d" % (test_case, Max = Min))
+```
+
+
+
+#### :green_book: <연습 문제 # 6> : 전기 버스
+
+https://swexpertacademy.com/
+
+learn - course - programming - intermediate - List1
+
+```python
+T = int(input())
+for test_case in range(1, T+1):
+    K, N, M = map(int, input().split())
+    arr = [0] + list(map(int, input().split())) +[N]
+    
+    ans = bus = 0
+    
+    for i in range(1, M + 2):
+        if arr[i] - arr[i - 1] > K:
+            ans = 0
+            break
+        if arr[i] > bus + K:
+            bus = arr[i - 1]
+            ans += 1
 ```
 
 
@@ -571,6 +686,705 @@ for n in range(10):
 
 
 #### :closed_book:분할 정복(Divide and Conquer)
+
+- 주어진 문제를 작은 사례로 나누고(Divide) 각각의 작은 문제들을 해결하여 정복 (Conquer)하는 방법
+- 분할정복법은 문제의 사례를 2개 이상의 더 작은 사례로 나눈다. 이 작은 사례는 주로 원래 문제에서 따온다. 나눈 작은 사례의 해답을 바로 얻을 수 있으면 해를 구하고 아니면  더 작은 사례로 나눈다.
+- **해를 구할 수 있을 만큼 충분히 더 작은 사례로 나누어 해결하는 방법**
+- 하향식(top-down) 접근 방법으로 최상위 사례의 해답은 아래로 내려가면서 작은 사례에 대한 해답을 구함으로써 구한다.
+
+
+
+  **장점**: 문제를 나눔으로써 어려운 문제를 해결할 수 있다는 엄청나게 중요한 장점이 있다. 그리고 이 방식이 그대로 사용되는 효율적인 알고리즘들도 여럿 있으며, 문제를 나누어 해결한다는 특징상 병렬적으로 문제를 해결하는 데 큰 강점이 있다. 
+
+**단점**: 함수를 재귀적으로 호출한다는 점에서 함수 호출로 인한 오버헤드가 발생하며, 스택에 다양한 데이터를 보관하고 있어야 하므로 `스택 오버플로우`가 발생하거나 과도한 메모리 사용을 하게 되는 단점  
+
+
+
+## :closed_lock_with_key:배열(Array) 2
+
+#### :bookmark_tabs: 2차원 배열의 선언
+
+- 1차원 List를 묶어놓은 List
+- 2차원 이상의 다차원 List는 차원에 따라 Index를 선언
+- 2차원 List의 선언 : 세로길이(행의 개수), 가로길이(열의 개수)를 필요로 함
+- Python 에서는 데이터 초기화를 통해 변수선언과 초기화가 가능함
+
+
+
+> ###### 2차 배열 탐색 목록 
+>
+> - 행우선 탐색
+> - 열우선 탐색
+> - 지그재그 탐색
+> - 대각 탐색
+> - 대각선, 테두리 탐색
+> - 사각 영역 탐색
+> - 기준점으로 탐색
+>
+> http://problems.kr/01array/2d_search.html
+
+
+
+#### :bookmark_tabs: 배열 순회
+
+![](https://user-images.githubusercontent.com/52684457/62434812-e35b1f80-b774-11e9-99fb-16fd45ef8ceb.png)
+
+- n X m 배열의 n*m개의  모든 원소를 빠짐없이 조사하는 방법
+
+![](https://user-images.githubusercontent.com/52684457/62433079-f8808000-b76d-11e9-8010-098d076d3114.png)
+
+`Array[j][i]`로 쓰면 열 우선순회가 되기 때문에 순서를 잘 써야 함.
+
+![](https://user-images.githubusercontent.com/52684457/62433224-82c8e400-b76e-11e9-90a8-a22b1ea681ab.png)
+
+```python
+N = 10 #10회 지그재그 순회
+
+for i in range(N):   # i = 행
+    if i % 2 == 0:
+        for j in range(N) # j = 열
+        pass
+    else:
+        for j in range(N-1, -1, -1):
+            pass
+```
+
+
+
+![](https://user-images.githubusercontent.com/52684457/62433428-5a8db500-b76f-11e9-827e-1b707a9ebfb2.png)
+
+
+
+#### :bookmark_tabs: 델타를 이용한 2차 배열 탐색
+
+- 2차 배열의 한 좌표에서 4 방향의 인접 배열 요소를 탐색하는 방법
+- 간결하며 구현이 쉽다.
+
+![](https://user-images.githubusercontent.com/52684457/62434223-bad22600-b772-11e9-976f-1f5006963360.png)
+
+```python
+N = 10 # N x M
+dx = [-1, +1, 0, 0] # 상 하 좌 우
+dy = [0, 0, -1, +1]
+
+for x in range(N): # 모든 행에 대해서
+    for y in range(N): # 모든 열에 대해서
+        # [x][y]
+        # 4 방향의 인접 위치 좌표를 생성
+        for i in range(4):
+            tx, ty = x + dx[i], y + dy[i]
+            #경계 체크
+            if tx < 0 or tx == N or ty < 0 or ty == N: continue
+```
+
+
+
+##### 대각 탐색
+
+![](https://user-images.githubusercontent.com/52684457/62435403-025ab100-b777-11e9-8a2e-442b6167daad.png)
+
+![](https://user-images.githubusercontent.com/52684457/62435404-025ab100-b777-11e9-9005-55c06ec0de7f.png)
+
+```python
+# 대각 탐색
+arr = [[ 1,  2,  4,  7, 11],
+      [ 3,  5,  8, 12, 15],
+      [ 6,  9, 13, 16, 18],
+      [10, 14, 17, 19, 20]]
+
+
+
+N, M = len(arr), len(arr[0])
+# dx, dy 각각 리스트로 저장
+for diag in range(0, N + M - 1):
+
+    x = 0 if diag < M else (diag - M + 1)
+    y = diag if diag < M else M - 1
+
+    while x < N and y >= 0:
+        print('%2d' % arr[x][y], end='')
+        x += 1
+        y -= 1
+    print()
+```
+
+
+
+#### :closed_book:부분집합 생성하기
+
+![](https://user-images.githubusercontent.com/52684457/62436484-bc075100-b77a-11e9-80f9-d641036f77c4.png)
+
+![](https://user-images.githubusercontent.com/52684457/62436587-156f8000-b77b-11e9-8737-662a0bc2bb63.png)
+
+```python
+arr = 'ABC'
+bits = [0] * 3
+
+def print_set(bits):
+    print(bits, end=' ')
+    for i in range(len(bits)):
+        if bits[i]:
+            print(arr[i], end=' ')
+    print()
+
+for i in range(2):
+    bits[0] = i
+    for j in range(2):
+        bits[1] = j
+        for k in range(2):
+            bits[2] = k
+            # print(bits)
+            print_set(bits)
+```
+
+```python
+# 도출 값
+[0, 0, 0]
+[0, 0, 1] C
+[0, 1, 0] B
+[0, 1, 1] B C
+[1, 0, 0] A
+[1, 0, 1] A C
+[1, 1, 0] A B
+[1, 1, 1] A B C
+```
+
+
+
+#### :closed_book:비트 연산자
+
+| 비트 연산자 | 비트 단위로 AND 연산을 한다.                 |
+| ----------- | -------------------------------------------- |
+| &           | 비트 단위로 AND 연산을 한다.                 |
+| \|          | 비트 단위로 OR 연산을 한다.                  |
+| <<          | 피연산자의 비트 열을 왼쪽으로 이동시킨다.    |
+| \>>         | 피연산자의 비트 열을 오른쪽으로 이동 시킨다. |
+
+- << 
+
+  - 1 << n : 2^n 즉, 원소가 n개일 경우의 모든 부분집합의 수를 의미한다.
+
+- & 
+
+  - i & (1<<j) : i의 j번째 비트가 1인지 아닌지를 리턴한다.
+
+  
+
+  ![](https://user-images.githubusercontent.com/52684457/62438755-e7426e00-b783-11e9-91ef-f708d5282ebc.png)
+
+```python
+n = 10
+
+if n % 2 == 0:
+    print('짝수')
+else:
+    print('홀수')
+
+# 위의 코드를 써도 되지만 아래의 방법도 가능하다.  
+
+    
+# 최하위의 1이 비트값이 0 인지 1인지 판단하는 것. (n의 0제곱이 0인지 1인지.)
+# 2의 제곱은 전부 짝수 인 것을 알 수 있다.
+if n & 1:
+    print('홀수')
+else:
+    print('짝수')
+```
+
+
+
+##### n진수
+
+```python
+# n진수
+num = 10
+print(bin(num))
+num2 = 0b1010 # 2진수
+num16 = 0xa # 16진수
+print(num, num2, num16) # 다 같은 10
+
+# &, |
+a = 0b1010
+b = 0b1011
+c = a & b
+d = a | b
+print(bin(c)) # 도출값 : b11010 / 하나라도 0(False)면 0(False)
+print(bin(d)) # 도출값 : b11011 / 하나라도 1(True)면 1(True)
+```
+
+![](https://user-images.githubusercontent.com/52684457/62439731-e9a6c700-b787-11e9-89ef-4d7bf2ee71c4.png)
+
+> **위의** 그림은 **<<**을 나타낸 것
+>
+> `<<`  - *2     
+>
+> - *(ex) a = 10 을 (a<<1 => 20) (a<<2 => 40) (a<<3 => 80)*
+>   *1<<10 은 2의 10제곱      =>     2<<10 2의 11제곱*   
+>
+> `>>`  - / 2
+
+
+
+![](https://user-images.githubusercontent.com/52684457/62440604-d7c72300-b78b-11e9-85d3-4175d23b1e9d.png)
+
+```python
+arr = [3, 6, 7, 1, 5, 4]
+
+n = len(arr) # n : 원소의 개수
+for i in range(1<<n): # 1<<n : 부분 집합의 개수
+    for j in range(n+1): # 원소의 수만큼 비트를 비교함
+        if i & (1<<j): # i의 j번째 비트가 1이면 j번째 원소 출력
+            print(arr[j], end=", ")
+    print()
+print()
+```
+
+```python
+# 도출 값
+3,
+6,
+3, 6,
+7,
+3, 7,
+6, 7,
+3, 6, 7,
+1,
+3, 1,
+6, 1,
+3, 6, 1,
+7, 1,
+3, 7, 1,
+6, 7, 1,
+3, 6, 7, 1,
+5,
+3, 5,
+6, 5,
+3, 6, 5,
+7, 5,
+3, 7, 5,
+6, 7, 5,
+3, 6, 7, 5,
+1, 5,
+3, 1, 5,
+6, 1, 5,
+3, 6, 1, 5,
+7, 1, 5,
+3, 7, 1, 5,
+6, 7, 1, 5,
+3, 6, 7, 1, 5,
+4,
+3, 4,
+6, 4,
+3, 6, 4,
+7, 4,
+3, 7, 4,
+6, 7, 4,
+3, 6, 7, 4,
+1, 4,
+3, 1, 4,
+6, 1, 4,
+3, 6, 1, 4,
+7, 1, 4,
+3, 7, 1, 4,
+6, 7, 1, 4,
+3, 6, 7, 1, 4,
+5, 4,
+3, 5, 4,
+6, 5, 4,
+3, 6, 5, 4,
+7, 5, 4,
+3, 7, 5, 4,
+6, 7, 5, 4,
+3, 6, 7, 5, 4,
+1, 5, 4,
+3, 1, 5, 4,
+6, 1, 5, 4,
+3, 6, 1, 5, 4,
+7, 1, 5, 4,
+3, 7, 1, 5, 4,
+6, 7, 1, 5, 4,
+3, 6, 7, 1, 5, 4,
+```
+
+
+
+
+
+
+
+![](https://user-images.githubusercontent.com/52684457/62441788-7786b000-b790-11e9-830e-04760464b570.png)
+
+인덱스의 위치가 바뀌는 것을 이용하여 접근한 방식
+
+| 10진수 | 2진수  | n = 10 |
+| ------ | ------ | ------ |
+| 10     | 1010   | n      |
+| 20     | 10100  | n << 1 |
+| 40     | 101000 | n << 2 |
+
+
+
+```python
+arr = [3, 6, 7, 1, 5, 4] # 리스트의 개수가 6 => 2의 6제곱
+N = len(arr) # N : 원소의 개수
+subset = 10 # 부분 집합
+
+for j in range(N):
+    if subset & (1 << j):
+        print(arr[j], end=' ') # j는 1, 3 이 나온다. 인덱스 1, 3은 6, 1
+
+for subset in range(1 << N): # 1<<N : 부분 집합의 개수
+    print(subset, end='> ')
+    for j in range(N): # 원소의 수만큼 비트를 비교함
+        if subset & (1 << j): 
+            print(arr[j], end=', ')
+    print()
+
+# << >> 개념 그리고 10진수를 2진수로 표현했을 때의 인덱스 값으로 문제를 풀이
+```
+
+```python
+# 도출 값
+6 1
+
+0>
+1> 3,
+2> 6,
+3> 3, 6,
+4> 7,
+5> 3, 7,
+6> 6, 7,
+7> 3, 6, 7,
+8> 1,
+9> 3, 1,
+10> 6, 1,
+11> 3, 6, 1,
+12> 7, 1,
+13> 3, 7, 1,
+14> 6, 7, 1,
+15> 3, 6, 7, 1,
+16> 5,
+17> 3, 5,
+18> 6, 5,
+19> 3, 6, 5,
+20> 7, 5,
+21> 3, 7, 5,
+22> 6, 7, 5,
+23> 3, 6, 7, 5,
+24> 1, 5,
+25> 3, 1, 5,
+26> 6, 1, 5,
+27> 3, 6, 1, 5,
+28> 7, 1, 5,
+29> 3, 7, 1, 5,
+30> 6, 7, 1, 5,
+31> 3, 6, 7, 1, 5,
+32> 4,
+33> 3, 4,
+34> 6, 4,
+35> 3, 6, 4,
+36> 7, 4,
+37> 3, 7, 4,
+38> 6, 7, 4,
+39> 3, 6, 7, 4,
+40> 1, 4,
+41> 3, 1, 4,
+42> 6, 1, 4,
+43> 3, 6, 1, 4,
+44> 7, 1, 4,
+45> 3, 7, 1, 4,
+46> 6, 7, 1, 4,
+47> 3, 6, 7, 1, 4,
+48> 5, 4,
+49> 3, 5, 4,
+50> 6, 5, 4,
+51> 3, 6, 5, 4,
+52> 7, 5, 4,
+53> 3, 7, 5, 4,
+54> 6, 7, 5, 4,
+55> 3, 6, 7, 5, 4,
+56> 1, 5, 4,
+57> 3, 1, 5, 4,
+58> 6, 1, 5, 4,
+59> 3, 6, 1, 5, 4,
+60> 7, 1, 5, 4,
+61> 3, 7, 1, 5, 4,
+62> 6, 7, 1, 5, 4,
+63> 3, 6, 7, 1, 5, 4,
+```
+
+```python
+# 합이 0이되는 부분집합 구하기
+arr = [3, 6, -1, 7, -3, 1, -5, -1, 5, 4] # 2의 n제곱만큼 돎.
+N = len(arr) # 10
+
+for i in range(1, 1 << N): # i는 부분집합을 표현, 공집합은 필요없다는 가정하에 1,
+    Sum = 0
+    for j in range(N):
+        if i & (1 << j): # arr[j]를 포함하는지 / 비트표현에서 j번째 인덱스에 포함하는것인지 아닌지
+            Sum += arr[j]
+    if Sum == 0:
+        for j in range(N):
+            if i & (1 << j):
+                print(arr[j], end=', ')
+        print()
+```
+
+```python
+# 도출 값
+3, -3,
+-1, 1,
+3, -1, -3, 1,
+6, -1, -5,
+3, 6, -1, -3, -5,
+7, -3, 1, -5,
+1, -1,
+3, -3, 1, -1,
+6, -5, -1,
+-1, 7, -5, -1,
+3, 6, -3, -5, -1,
+3, -1, 7, -3, -5, -1,
+6, -1, 1, -5, -1,
+3, 6, -1, -3, 1, -5, -1,
+-5, 5,
+3, -3, -5, 5,
+-1, 1, -5, 5,
+3, -1, -3, 1, -5, 5,
+-1, -3, -1, 5,
+1, -5, -1, 5,
+3, -3, 1, -5, -1, 5,
+-1, -3, 4,
+1, -5, 4,
+3, -3, 1, -5, 4,
+-3, -1, 4,
+-1, -3, 1, -1, 4,
+3, -1, -5, -1, 4,
+6, -1, -3, -5, -1, 4,
+-1, -3, -5, 5, 4,
+-3, -5, -1, 5, 4,
+-1, -3, 1, -5, -1, 5, 4,
+```
+
+
+
+
+
+------
+
+
+
+### :book:검색(Search)
+
+- 저장되어 있는 자료 중에서 원하는 항목을 찾는 작업
+- 목적하는 탐색 키를 가진 항목을 찾는 것 
+  - 탐색 키(search key) : 자료를 구별하여 인식할 수 있는 키
+- 검색의 종류
+  - 순차 검색(Sequential search)
+  - 이진 검색(binary search)
+  - 해쉬(hash)
+
+
+
+#### :blue_book:순차 검색(Sequential Search)
+
+- 일렬로 되어 있는 자료를 순서대로 검색하는 방법
+  - 가장 간단하고 직관적인 검색 방법
+  - 배열이나 연결 리스트 등 순차구조로 구현된 자료구조에서 원하는 항목을 찾을 때 유용함
+  - 알고리즘이 단순하여 구현이 쉽지만, 검색 대상의 수가 많은 경우에는 수행시간이 급격히 증가하여 비효율적임
+- 2가지 경우
+  - 정렬되어 있지 않은 경우
+  - 정렬되어 있는 경우
+
+
+
+##### :triangular_flag_on_post:정렬되어 있지 않은 경우
+
+- 검색 과정
+  - 첫 번째 원소부터 순서대로 검색 대상과 키 값이 같은 원소가 있는지 비교하며 찾는다.
+  - 키 값이 동일한 원소를 찾으면 그 원소의 인덱스를 반환한다.
+  - 자료구조의 마지막에 이를 때까지 검색 대상을 찾지 못하면 검색 실패
+
+![](https://user-images.githubusercontent.com/52684457/62442149-e3b5e380-b791-11e9-8b94-3f387a17900e.png)
+
+![](https://user-images.githubusercontent.com/52684457/62442155-ea445b00-b791-11e9-99ba-4c26381741bc.png)
+
+![](https://user-images.githubusercontent.com/52684457/62442166-f203ff80-b791-11e9-9477-a1351322a6b8.png)
+
+
+
+
+
+##### :triangular_flag_on_post:정렬되어 있는 경우
+
+- 검색 과정
+  - 자료가 오름차순으로 정렬된 상태에서 검색을 실시한다고 가정하자.
+  - 자료를 순차적으로 검색하면서 키 값을 비교하여, 원소의 키 값이 검색 대상의 키 값보다 크면 찾는 원소가 없다는 것이므로 더 이상 검색하지 않고 검색을 종료한다.
+
+![](https://user-images.githubusercontent.com/52684457/62442172-faf4d100-b791-11e9-9fef-0a234aa48898.png)
+
+![](https://user-images.githubusercontent.com/52684457/62442183-06e09300-b792-11e9-93d2-a2e741a51102.png)
+
+완전 검색할 필요없이 검색을 종료 할 수 있다.
+
+![](https://user-images.githubusercontent.com/52684457/62442186-0c3ddd80-b792-11e9-9ee4-a4b0d32499cf.png)
+
+
+
+###### :star:이진 탐색
+
+- 자료의 가운데에 있는 항목의 키 값과 비교하여 다음 검색의 위치를 결정하고 검색을 계속 진행하는 방법
+  - 목적 키를 찾을 때까지 이진 검색을 순환적으로 반복 수행함으로써 검색 범위를 반으로 줄여가면서 보다 빠르게 검색을 수행함
+- **이진 검색을 하기 위해**서는 **자료가 정렬된 상태**여야 한다.
+
+- 검색과정
+  - 자료의 중앙에 있는 원소를 고른다.
+  - 중앙 원소의 값과 찾고자 하는 목표 값을 비교한다.
+  - 목표 값이 중앙 원소의 값보다 작으면 자료의 왼쪽 반에 대해서 새로 검색을 수행하고, 크다면 자료의 오른쪽 반에 대해서 새로 검색을 수행한다.
+  - 찾고자하는 값을 찾을 때 까지 위의 1~3의 과정을 반복한다.
+
+![](https://user-images.githubusercontent.com/52684457/62443939-2b8b3980-b797-11e9-83dd-d329ca3bb44e.png)
+
+![](https://user-images.githubusercontent.com/52684457/62443941-2b8b3980-b797-11e9-921f-661b794f9f35.png)
+
+```python
+arr = [] # 값이 들어잇는 리스트라고 가정
+key = 123
+start, end = 0, len(arr) - 1
+
+def binarySearch(arr, key):
+    start, end = 0, len - 1
+
+    while start <= end:
+        mid = (start + end) >> 1 # /2가 됨 , //2를 해줘도 된다.
+        if arr[mid] == key: # 중간 값에서 이미 찾았다면 (검색 성공!)
+            break
+        if arr[mid] > key:
+        # 중간의 값과 키값을 비교를 했더니 키값이 더 크다면 => 왼쪽에서 찾아야 함
+            end = mid - 1
+        else:
+            start = mid + 1 # 시작할 위치를 중간 다음으로 
+
+        return -1
+```
+
+
+
+```python
+# 재귀 함수 이용
+def binarySearch(arr, start, end, key):
+    if start > end : return False
+    mid = (start + end) >> 1
+    if arr[mid] == key:
+        return True
+    if arr[mid] > key: 
+        return binarySearch(arr, start, mid - 1, key)
+    else:
+        return binarySearch(arr, mid + 1, end, key)
+```
+
+
+
+------
+
+
+
+#### :bookmark:인덱스
+
+- 인덱스라는 용어는 Database에서 유래했으며, 테이블에 대한 동작 속도를 높여주는 자료 구조를 일컫는다. Database 분야가 아닌 곳에서는 Look up table 등의 용어를 사용하기도 한다.
+- 인덱스를 저장하는데 필요한 디스크 공간은 보통 테이블을 저장하는데 필요한 디스크 공간보다 작다. 왜냐하면 보통 인덱스는 키-필드만 갖고 있고, 테이블의 다른 세부 항목들은 갖고 있지 않기 때문이다.
+- 배열을 사용한 인덱스
+  - 대량의 데이터를 매번 정렬하면, 프로그램의 반응은 느려질 수 밖에 없다. 이러한 대량 데이터의 성능 저하 문제를 해결하기 의해 배열 인덱스를 사용하라 수 있다.
+
+![](https://user-images.githubusercontent.com/52684457/62444614-f4b62300-b798-11e9-88e5-41f858c32dc5.png)
+
+
+
+
+
+##### 셀렉션 알고리즘(Selection Algorithm)
+
+- 저장되어 있는 자료로부터 k번째로 큰 혹은 작은 원소를 찾는 방법을 셀렉션 알고리즘이라 한다.
+
+  - 최소값, 최대값 혹은 중간 값을 찾는 알고리즘을 의미하기도 한다.
+
+- 선택과정
+
+  - 셀렉션은 아래와 같은 과정을 통해 이루어진다.
+
+    1. 정렬 알고리즘을 이용하여 자료 정렬하기
+    2. 원하는 순서에 있는 원소 가져오기
+
+    
+
+> 1번부터 N번째 까지 작은 원소들을 찾아 배열의 앞쪽으로 이동, 배열의 N번째를 반환
+>
+> N이 비교적 작을 때 유용, O(Nn)의 수행시간을 필요로 한다.
+
+```python
+arr = [64, 25, 10, 22, 11]
+N = len(arr)
+# 최소값의 위치를 찾는다.
+minIdx = 0
+for j in range(minIdx + 1, N):
+    if arr[minIdx] > arr[j]:
+        minIdx = j
+arr[0], arr[minIdx] = arr[minIdx], arr[0]
+# 10은 이제 자기 위치를 찾았다. => [10, 25, 64, 22, 11]
+# [1, n-1] 최소값을 찾는다.
+
+minIdx = 1
+for j in range(minIdx + 1, N):
+    if arr[minIdx] > arr[j]:
+        minIdx = j
+arr[1], arr[minIdx] = arr[minIdx], arr[1]
+# 11도 자기 위치를 찾았다. => [10, 11, 64, 22, 25]
+
+# [2, n-1]
+# [n-2, n-1] . . . n-1번 반복하면 된다.
+```
+
+```python
+# 식을 정리하면,
+for i in range(N - 1):
+    minIdx = i
+    for j in range(i + 1, N):
+        if arr[minIdx] > arr[j]:
+            minIdx = j
+    arr[i], arr[minIdx] = arr[minIdx], arr[i]
+
+print(arr)
+```
+
+
+
+#### :blue_book:선택 정렬(Selection Sort)
+
+- 주어진 자료들 중 가장 작은 값의 원소부터 차례대로 선택하여 위치를 교환하는 방식
+  - 앞서 살펴본 셀렉션 알고리즘을 전체 자료에 적용한 것
+- 정렬과정
+  - 주어진 리스트 중에서 최소값을 찾는다.
+  - 그 값을 리스트의 맨 앞에 위치한 값과 교환한다.
+  - 맨 처음 위치를 제외한 나머지 리스트를 대상으로 위의 과정을 반복한다.
+- 시간 복잡도
+  - O(n^2)
+
+![](https://user-images.githubusercontent.com/52684457/62445082-5fb42980-b79a-11e9-94e4-89b8a7f6c785.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445094-680c6480-b79a-11e9-8833-46b96aaded52.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445102-6c388200-b79a-11e9-9156-2b50c973ea84.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445112-6fcc0900-b79a-11e9-9e84-4cc96bba23e5.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445123-75c1ea00-b79a-11e9-9c75-9bac90752003.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445129-7b1f3480-b79a-11e9-8da6-5cc3bf0ecc89.png)
+
+![](https://user-images.githubusercontent.com/52684457/62445143-86726000-b79a-11e9-986d-cb495d5cd5dd.png)
+
+
+
+
 
 
 

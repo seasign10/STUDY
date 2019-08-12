@@ -1,6 +1,6 @@
 
 
-# :card_file_box:  Algorithm
+# :card_file_box:  Algorithm : List
 
 `Python` 은 인터프리터가 내장되어있어 간편한 코딩을 도와주지만 실행이 느림
 

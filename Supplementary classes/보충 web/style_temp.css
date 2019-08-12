@@ -1,0 +1,22 @@
+.header {
+  background-color: dimgray;
+  color: white;
+}
+
+.aside-left {
+  background-color: crimson;
+  color: white;
+}
+
+.section {
+  background-color: lightskyblue;
+}
+
+.aside-right {
+  background-color: darkorange;
+}
+
+.footer {
+  background-color: dimgray;
+  color: white;
+}

@@ -39,4 +39,3 @@
 > :page_facing_up: study10_Web_CSS_Deepening.md
 >
 > :page_facing_up: study11_Algorithm_String.md
-

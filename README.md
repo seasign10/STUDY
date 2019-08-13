@@ -2,11 +2,11 @@
 
 ### :open_file_folder: 00_Supplementary classes
 
-> **01_python** 
+> ###### 01_python 
 >
 > - Jupyter Notebook files consisting of Dictionary, List,String and Class
 
-> ##### 02_web
+> ###### 02_web
 >
 > - Study Layout, Style, Bootstrap
 

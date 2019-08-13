@@ -109,6 +109,25 @@ print(''.join(arr))
   - *ex) 기러기, level . . .*
 
   ```python
+  # 강사님 tip
+  start = (0~N - M)
+  end = start + M -1
+  
+  # 회문 조사 방법
+  # 가능한 모든 경우를 조사하는 방법
+  arr = []
+  N = M = 0 # N: 행의 길이, M: 찾을 회문 길이
+  # tlwkrdnlcl 0 ~ N - M
+  for row in range(N):
+      
+      for start in range(N - M + 1):
+          end = start + M - 1
+          for i in range(M//2):
+              if arr[row][start + i] != arr[row][end - i]:
+                  break
+              else:
+                  # 회문을 찾음
+  
   # 1.
   import sys
   sys.stdin = open("1989.txt", "r")
@@ -119,7 +138,7 @@ print(''.join(arr))
       m = len(arr)
   
       for i in range(m//2):
-          if arr[i] == arr[m-1-i]:
+        if arr[i] == arr[m-1-i]:
               result = '1'
           else:
               result = '0'
@@ -138,7 +157,7 @@ print(''.join(arr))
           else:
               print('#{} 0'.format(m))
   ```
-
+  
   
 
 ```python

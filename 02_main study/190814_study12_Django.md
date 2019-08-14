@@ -1,3 +1,5 @@
+
+
 # :dog:Django
 
 ##### :seedling: 100% Python으로 코드를 잘해야 하기 때문에 (python으로 이루어진 framework)
@@ -114,6 +116,8 @@
 > ![](https://user-images.githubusercontent.com/52684457/62987259-d11a6900-be79-11e9-8c61-afe4d9a2d40c.png)
 >
 > - study1_Git_and_Visual_Studio_Code.md 파일에서 만든 환경변수 venv는 우리가 편하기 위해 만든 환경변수 이름일 뿐 여기서 사용하는 venv와 혼동하면 안된다.
+> - 위의 밑줄 그어진 venv도 환경변수 이름이다. (다른 이름을 지정해줘도 상관 x)
+> - 아래의 source를 할때에 venv를 지정해준 환경 변수 이름경로로 들어가주면 된다.
 >
 > 
 >
@@ -138,6 +142,16 @@
 > 
 >
 > #### :seedling: 잘 켜지는 것이 확인 되었다면
+>
+> ![](https://user-images.githubusercontent.com/52684457/62987260-d1b2ff80-be79-11e9-95c3-0928cc4338ba.png)
+>
+> - 위의 경로로 들어가서
+>
+> ![](https://user-images.githubusercontent.com/52684457/62987258-d11a6900-be79-11e9-81cc-91a5560d145f.png)
+>
+> - 사용할 환경변수를 선택해주면 된다. 아래의 파란 바에있는 이름이 바뀌는 것을 확인 할 수 있다.
+>
+> 
 >
 > ![](https://user-images.githubusercontent.com/52684457/62988553-cbc01d00-be7f-11e9-83b0-a94fe07cee47.PNG)
 >
@@ -167,18 +181,18 @@
 >
 > ```python
 > INSTALLED_APPS = [
->     # app 등록 순서 (Djaingo가 제공하는 스타일 가이드)
->     # 1. local apps
->     # 2. Third party apps (ex. beautiful soap 과 같은 apps)
->     # 3. Django apps
->     'pages.apps.PagesConfig', #  Local apps(1.)
->     # pages라는 폴더에, apps라는 파일에 PagesConfig
->     'django.contrib.admin', # 여기서 아래의 6가지가 Django의 기본 apps (3.)
->     'django.contrib.auth',
->     'django.contrib.contenttypes',
->     'django.contrib.sessions',
->     'django.contrib.messages',
->     'django.contrib.staticfiles',
+>  # app 등록 순서 (Djaingo가 제공하는 스타일 가이드)
+>  # 1. local apps
+>  # 2. Third party apps (ex. beautiful soap 과 같은 apps)
+>  # 3. Django apps
+>  'pages.apps.PagesConfig', #  Local apps(1.)
+>  # pages라는 폴더에, apps라는 파일에 PagesConfig
+>  'django.contrib.admin', # 여기서 아래의 6가지가 Django의 기본 apps (3.)
+>  'django.contrib.auth',
+>  'django.contrib.contenttypes',
+>  'django.contrib.sessions',
+>  'django.contrib.messages',
+>  'django.contrib.staticfiles',
 > ]
 > 
 > # Internationalization

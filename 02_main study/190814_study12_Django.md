@@ -379,6 +379,8 @@ urlpatterns = [
 
 
 
+------
+
 
 
 ### :paw_prints: variacle routing
@@ -415,6 +417,9 @@ dinner의 함수와 합쳐서 수정해보자 !
 
 ```python
 # views.py
+import random
+from django.shortcuts import render
+
 def hello(request, name): # name은 변수, 이름이 달라도 상관이 없다.
     menu = ['족발', '햄버거', '치킨', '라멘']
     pick = random.choice(menu)
@@ -422,4 +427,300 @@ def hello(request, name): # name은 변수, 이름이 달라도 상관이 없다
     # 오른쪽의 name이 함수 인자로 받은 name / , 트레일링 컴마는 잊지않고 작성
     return render(request, 'hello.html', context)
 ```
+
+
+
+
+
+###### variable routing 을 응용해보자.
+
+1. ###### 자기소개 - 이름과 나이를 받아서 출력 (introduce 확장)
+
+```python
+# views.py
+def introduce(request, name, age):
+    context = {'name': name, 'age': age,}
+    return render(request, 'introduce.html', context)
+```
+
+```python
+# urls.py
+urlpatterns = [
+    path('introduce/<name>/<int:age>/', views.introduce),
+    path('admin/', admin.site.urls),
+]
+```
+
+```html
+<!-- introduce.html -->
+<h1>안녕하세요, 이름은 {{ name }} 나이는 {{ age }}살 입니다. </h1>
+```
+
+
+
+
+
+2. ###### 숫자 2개를 받아 두 수의 곱셈 결과를 출력 (times)
+
+```python
+# views.py
+def times(request, num1, num2):
+    mul = num1 * num2
+    context = {'mul': mul, 'num1': num1, 'num2': num2,}
+    return render(request, 'times.html', context)
+```
+
+```python
+# urls.py
+urlpatterns = [
+    path('times/<int:num1>/<int:num2>/', views.times),
+    path('admin/', admin.site.urls),
+]
+```
+
+```html
+<!-- times.html -->
+<h1> {{ num1 }} 곱하기 {{ num2 }}는 {{mul}}입니다. </h1>
+```
+
+
+
+
+
+3. ###### 반지름 값을 받아 원의 넓이 출력 (area)
+
+```python
+# views.py
+def area(request, r):
+    area = (r ** 2) * 3.14
+    context = {'r': r, 'area': area,}
+    return render(request, 'area.html', context)
+```
+
+```python
+# urls.py
+urlpatterns = [
+    path('area/<int:r>/', views.area),
+    path('admin/', admin.site.urls),
+]
+```
+
+```html
+<!-- area.html -->
+<h1>반지름의 길이가 {{ r }} 인 원의 넓이는 {{area}} 입니다. </h1>
+```
+
+
+
+
+
+------
+
+
+
+## :dog: Django Template Language (DTL)
+
+- django template 에서 사용하는 내장 template system
+- 조건, 반복, 변수 치환, 필터 등 많은 기능을 제공한다.
+- https://docs.djangoproject.com/en/2.2/ref/templates/language/
+- https://docs.djangoproject.com/en/2.2/topics/templates/#the-django-template-language
+
+*flask는 Jinja2*
+
+
+
+```python
+import random # 위 아래 같은 standard library 이다
+# 이럴 때에는 더 짧은 것을 위에 써준다. (스타일 가이드)
+from datetime import datetime
+from django.shortcuts import render
+
+def template_language(request):
+    menus = ['잡채밥', '짬뽕', '마라탕', '마랴텐지투이',]
+    my_sentence = 'Life is short, you need python'
+    messages = ['apple', 'bansns', 'cucumber', 'bean',]
+    datetimenow = datetime.now()
+    empty_list = []
+    context = {
+        'menus': menus,
+        'my_sentence': my_sentence,
+        'messages': messages,
+        'datetimenow': datetimenow,
+        'empty_list': empty_list,
+    }
+    return render(request, 'template_language.html', context)
+```
+
+```python
+urlpatterns = [
+    path('template_language/', views.template_language),
+    path('admin/', admin.site.urls),
+]
+```
+
+```html
+<h3>1. 반복문</h3>
+{% for menu in menus %}
+<p> {{ menu }} </p>
+{% endfor %}
+<hr>
+
+<!-- forloop는 DTL for 문 안에서 자동으로 생기는 객체 -->
+{% for menu in menus %}
+<p>{{ forloop.counter }} {{ menu }}</p>
+{% endfor %}
+<hr>
+
+<!-- 비어있으면 자동으로 아래 코드를 읽는다. -->
+{% for user in empty_list %}
+<p>{{ user }}</p>
+{% empty %} 
+<p>현재 가입된 유저가 업습니다.</p>
+{% endfor %}
+<hr>
+<hr>
+
+<h3>2. 조건문</h3>
+{% if '짬뽕' in menus %}
+<p>짬뽕은 사골육수지!</p>
+{% endif %}
+<hr>
+
+{% for menu in menus %}
+{{ forloop.counter }} 번째 도는중..
+  {% if forloop.first %}
+  <p>잡채밥 + 당면듬뿍</p>
+  {% else %}
+  <p>{{ menu }}</p>
+  {% endif %}
+{% endfor %}
+<hr>
+<hr>
+
+<!-- <=, >=, ==, !=, >, <, in, not in, is 모두사용 가능 -->
+<h3>3. legth filter</h3>
+{% for message in messages %}
+  {% if message|length > 5 %}
+  <p>{{ message }}, 글자가 너무 길어요</p>
+  {% else %}
+  <p>{{ message }}, {{ message|length }}</p>
+  {% endif %}
+{% endfor %}
+<hr>
+<hr>
+
+<!-- 이미 정의되어 있는 변수 호출은 % 태그를 사용한다. -->
+<h3>4. lorem ipsum</h3>
+{% lorem %}
+<hr>
+{% lorem 3 w %}
+<hr>
+{% lorem 4 w random %}
+<hr>
+{% lorem 2 p %}
+<hr>
+<hr>
+
+<h3>5. 글자수 제한</h3>
+<p>{{ my_sentence|truncatewords:3 }}</p> <!-- 공백까지 한꺼번에 포함해서 한글자 -->
+<p>{{ my_sentence|truncatechars:3 }}</p> <!-- 한 글자씩 -->
+<hr>
+<hr>
+
+<h3>6. 글자 관련 필터</h3>
+<p>{{ 'abc'|length }}</p>
+<p>{{ 'abc'|upper }}</p>
+<p>{{ 'ABC'|lower }}</p>
+<p>{{ my_sentence|title }}</p>
+<p>{{ 'abc def'|capfirst }}</p>
+<p>{{ menus|random }}</p>
+<hr>
+<hr>
+
+<!-- 더 많은 연산 관련 기능은 django math filters 라이브러리가 필요 -->
+<h3>7. 연산</h3>
+<p>{{ 4|add:6 }}</p>
+<hr>
+<hr>
+
+<h3>8. 날짜표현</h3>
+<p>{{ datetimenow }}</p> 
+<p>{% now "DATETIME_FORMAT" %}</p> <!-- 기본적으로 내장되어있는 함수 -->
+<p>{% now "SHORT_DATETIME_FORMAT" %}</p> <!-- 만약 처음 시작 할 때 setting.Time_ZONE 값을 한국 시간으로 정해주지 않으면 미국 시간으로 나온다. -->
+<p>{% now "DATE_FORMAT" %}</p>
+<p>{% now "SHORT_DATE_FORMAT" %}</p>
+<hr>
+{% now "Y년 m월 d일 (D) h:i" %}
+<hr>
+{% now "Y" as current_year %}
+Copyright {{ current_year }}
+<hr>
+{{ datetimenow|date:"SHORT_DATE_FORMAT" }}
+<hr>
+<hr>
+
+<h3>9. 기타</h3>
+<p>{{ 'google.com'|urlize}}</p> <!-- a태그와 비슷한 기능 -->
+
+
+{% comment %} <!-- -->는 Django 주석이 아니다. 그렇기 때문에 {% %}태그가 들어가면 페이지가 열리지 않는다. / 현재 편의상 <!-- --> 사용 {% endcomment %}
+```
+
+- django math filters - https://pypi.org/project/django-mathfilters/
+  - 기본적으로 연산같은 경우는 views에서 전부 처리하는 것이 좋은 예
+  - 하지만 굳이 사용하겠다면 위의 사이트에서 외장 함수를 가져다 써야한다.
+
+
+
+##### :paw_prints: DTL을 응용해보자!
+
+> ######  isitgwangbok?
+>
+> - views - isitgwangbok
+> - 현재 시점이 광복절이라면 오늘은 광복절입니다 라고 출력
+> - 아니라면 오늘은 광복절이 아닙니다. 를 출력
+>
+> 3. ###### 
+>
+> ```python
+> # views.py / 최대한 view 에서 계산
+> from datetime import datetime
+> from django.shortcuts import render
+> 
+> def isitgwangbok(request):
+>     today = datetime.now()
+>     if today.month == 8 and today.day == 15:
+>         result = True
+>     else:
+>         result = False
+>     context = {'result': result,}
+>     return render(request, 'isitgwangbok.html', context)
+> ```
+>
+> ```python
+> # urls.py
+> urlpatterns = [
+>     path('isitgwangbok/', views.isitgwangbok),
+>     path('admin/', admin.site.urls),
+> ]
+> ```
+>
+> ```html
+> <!-- isitgwangbok.html -->
+> {% if result %}
+> <p>오늘은 광복절 입니다.</p>
+> {% else %}
+> <p>오늘은 광복절이 아닙니다.</p>
+> {% endif %}
+> ```
+
+
+
+
+
+
+
+
+
+
 

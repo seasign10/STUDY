@@ -87,7 +87,40 @@
 
 
 
-> 2) **환경변수 설정**
+> 2) 의존성 기록, 설치
+>
+> - Django를 복습하기 위해 github에서 git clone을 하지만 .gitignore(가상환경이 올라가지 않도록)가 되어있기 때문에 github에서는 clone에 환경변수가 없다.
+>   - 원래 환경변수는 사이트에 올리는 것이 x
+>   - 이런 상황이 되면 환경변수에 설치된 pip install 등을 하나하나 일일히 받아야 하는 번거로움이 생김
+>
+> 
+>
+> 1. 현재 사용하고 있는 가상환경이 설치된 폴더에서 터미널을 켜서 의존성 기록
+> 2. 새로운 venv 설치 => 의존성 설치
+>
+> 
+>
+> pip list ( 현재 설치된 것들을 볼 수 있다. )
+>
+> 
+>
+> - 의존성 기록 (구성환경 리스트 목록 만들기)
+>
+> pip freeze > requirments.txt
+>
+> - 의존성 설치
+>
+> pip install -r requirments.txt
+>
+> ![](https://user-images.githubusercontent.com/52684457/63156370-83eff000-c04f-11e9-8220-9ad34592dfd6.png)
+
+
+
+
+
+
+
+> ###### 3) **환경변수 설정**
 >
 > ![](https://user-images.githubusercontent.com/52684457/62986397-5ef45500-be76-11e9-971d-95c62577e5f0.png)
 
@@ -1425,9 +1458,6 @@ TEMPLATES = [
     <h2>{{ test }}</h2>
   {% endblock %}
   ```
-
-  
-
 
 
 

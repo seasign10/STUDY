@@ -10,6 +10,10 @@
 >
 > - Study Layout, Style, Bootstrap
 
+> ###### 03_algorithm
+>
+> - Study basic algorithm problem
+
 ### :open_file_folder: 01_Startcamp
 
 > ###### Intro process before learning programming
@@ -40,4 +44,8 @@
 >
 > :page_facing_up: study11_Algorithm_String.md
 >
-> :page_facing_up: study12_Django
+> :page_facing_up: study12_Django_Template_and_View
+>
+> :page_facing_up: study13_Algorithm_Stack
+>
+> :page_facing_up: study14_Django_Model_Admin

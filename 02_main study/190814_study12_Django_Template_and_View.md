@@ -106,11 +106,11 @@
 >
 > - 의존성 기록 (구성환경 리스트 목록 만들기)
 >
-> pip freeze > requirments.txt
+> pip freeze > requirements.txt
 >
 > - 의존성 설치
 >
-> pip install -r requirments.txt
+> pip install -r requirements.txt
 >
 > ![](https://user-images.githubusercontent.com/52684457/63156370-83eff000-c04f-11e9-8220-9ad34592dfd6.png)
 
@@ -230,20 +230,25 @@
 >
 > 
 >
+> - #### 아래의 코드를 참고하기전에 주의 할 점!
+>
+>   - `'pages.apps.PagesConfig'` , pages라는 app파일이 저장되어 있는것을 알 수 있는데, 이 코드는 아래의 `python manage.py startapp pages` 명령어를 실행시킨 후 (app파일을 이미 만든 후) 적용을 해야하는 부분이다.
+>   - app등록이 먼저 이루어 지고 그 이후에 app파일을 생성하면 오류가 난다.
+>
 > ```python
 > INSTALLED_APPS = [
->  # app 등록 순서 (Djaingo가 제공하는 스타일 가이드)
->  # 1. local apps
->  # 2. Third party apps (ex. beautiful soap 과 같은 apps)
->  # 3. Django apps
->  'pages.apps.PagesConfig', #  Local apps(1.)
->  # pages라는 폴더에, apps라는 파일에 PagesConfig
->  'django.contrib.admin', # 여기서 아래의 6가지가 Django의 기본 apps (3.)
->  'django.contrib.auth',
->  'django.contrib.contenttypes',
->  'django.contrib.sessions',
->  'django.contrib.messages',
->  'django.contrib.staticfiles',
+> # app 등록 순서 (Djaingo가 제공하는 스타일 가이드)
+> # 1. local apps
+> # 2. Third party apps (ex. beautiful soap 과 같은 apps)
+> # 3. Django apps
+> 'pages.apps.PagesConfig', #  Local apps(1.)
+> # pages라는 폴더에, apps라는 파일에 PagesConfig
+> 'django.contrib.admin', # 여기서 아래의 6가지가 Django의 기본 apps (3.)
+> 'django.contrib.auth',
+> 'django.contrib.contenttypes',
+> 'django.contrib.sessions',
+> 'django.contrib.messages',
+> 'django.contrib.staticfiles',
 > ]
 > 
 > # Internationalization

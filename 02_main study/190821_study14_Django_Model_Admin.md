@@ -74,7 +74,7 @@
 ##### CharField()
 
 - 길이의 제한이 있는 문자열을 넣을 때 사용
-- `max_lenght` 는 필수 인자
+- `max_length` 는 필수 인자
 - 필드의 최대 길이(문자)이며 DB와 django의 유효성 검사(값을 검증)에서 사용됨
 - 텍스트 양이 많을 경우 `TextFeild()` 로 사용(대체 해야함)
 
@@ -140,21 +140,28 @@
    - migrations로 만든 설계도를 기반으로 `db.sqlite3` DB에 반영한다.
      *실제 DB 테이블을 생성*
 
+     ```bash
+    $ python manage.py migrate
+     ```
+     
    - **모델에서의 변경사항들과 DB 스키마가 동기화**를 이룬다.
 
-     ```bash
-     $ python manage.py sqlmigrate app_name 0001
-     ```
+     
+   
+  ###### :mushroom: 동기화를 하기 전에 ...
 
+```bash
+ $ python manage.py sqlmigrate app_name 0001
+```
    - 해당 migrations 설계도가 SQL 문으로 어떻게 해석되어서 동작할지 미리 볼 수 있다.
      (필수는 x 궁금하다면 확인 가능)
 
-     ```bash
-     $ python manage.py showmigrations
-     ```
+  ```bash
+$ python manage.py showmigrations
+  ```
 
-     - [X]는 안된 것이 아니라, 체크된 것
-     - migrations 설계도들이 migrate 되었는지 안되었는지 확인
+ - [X]는 안된 것이 아니라, 체크된 것
+ - migrations 설계도들이 migrate 되었는지(동기화가 되었는지) 안되었는지 확인
 
 
 
@@ -248,7 +255,8 @@ class Article(models.Model): # models.Model의 상속을 받는다.
     
 ```
 
-
+- app폴더 articles(복수형)와 models.py 의 class Article을 헷갈리지 말자!
+  - Article에서 인스턴스를 생성할때에는 article로 작성하였으니 유의하자.
 
 ------
 

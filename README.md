@@ -49,3 +49,5 @@
 > :page_facing_up: study13_Algorithm_Stack
 >
 > :page_facing_up: study14_Django_Model_Admin
+>
+> :page_facing_up: study15_Django_CRUD

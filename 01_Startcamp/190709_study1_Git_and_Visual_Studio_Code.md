@@ -520,6 +520,8 @@ terminal here -> install
 >**q** 응답이 너무 길어서 작동하지 않을때
 >
 >**rm** **-rf .git** git을 지우는 것
+>
+>**-f** git push -f 강제푸쉬
 
 
 

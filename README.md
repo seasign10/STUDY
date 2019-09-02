@@ -36,7 +36,7 @@
 
 > ###### Main Study
 >
-> :page_facing_up: study8_Algorithm_List.md
+> :page_facing_up: study8_Algorithm_Array.md
 >
 > :page_facing_up: study9_Web.md
 >
@@ -44,14 +44,19 @@
 >
 > :page_facing_up: study11_Algorithm_String.md
 >
-> :page_facing_up: study12_Django_Template_and_View
+> :page_facing_up: study12_Django_Template_and_View.md
 >
-> :page_facing_up: study13_Algorithm_Stack
+> :page_facing_up: study13_Algorithm_Stack.md
 >
-> :page_facing_up: study14_Django_Model_Admin
+> :page_facing_up: study14_Django_Model_Admin.md
 >
-> :page_facing_up: study15_Django_CRUD
+> :page_facing_up: study15_Django_CRUD.md
 >
-> :page_facing_up: study16_Algorithm_Stack2
+> :page_facing_up: study16_Algorithm_Stack2.md
 >
-> :page_facing_up: ​study17_Algorithm_Queue
+> :page_facing_up: study17_Algorithm_Queue.md
+>
+> :page_facing_up: study18_Algorithm_List.md
+>
+> :page_facing_up: study19_Algorithm_Tree
+

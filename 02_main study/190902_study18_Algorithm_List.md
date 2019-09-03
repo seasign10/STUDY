@@ -493,7 +493,9 @@ print(top.data)
 
 ![](https://user-images.githubusercontent.com/52684457/64092540-29190100-cd90-11e9-8907-64594f945fbd.png)
 
+- 특정 인덱스에 노드 추가
 
+![](https://user-images.githubusercontent.com/52684457/64152037-ad3db800-ce66-11e9-94c3-635300e19f14.png)
 
 ### :card_index_dividers: Revisit to 우선순위 큐
 

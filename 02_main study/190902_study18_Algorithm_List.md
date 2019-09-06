@@ -220,7 +220,7 @@ def deleteFirst(): # 처음 노드 삭제
 
 
 
-#### :closed_lock_with_key: 이중 연결 리스트(Doubley Linked List)
+### <u>:closed_lock_with_key: 이중 연결 리스트(Doubley Linked List)</u>
 
 - 특성
   - 양쪽 방향으로 순회 할 수 있도록 노드를 연결한 리스트

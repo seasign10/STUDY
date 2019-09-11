@@ -91,7 +91,10 @@ ctrl+shift+P -> defalt shell -> git bash로 선택하면 기본 터미널로 정
 
 ```
 
+![](https://user-images.githubusercontent.com/52684457/64659222-82aabb00-d475-11e9-9194-42120f25cc01.png)
 
+- 자신의 컴퓨터 사양에 맞게 설치하는 것이 좋다. 
+  *현재 img : windows 64비트*</u>
 
 #### ++ 알고리즘 수업때의 글로벌 (파이썬 3.5.ver)
 

@@ -63,4 +63,6 @@
 > :page_facing_up: study20_APS_Start
 >
 > :page_facing_up: study21_Djaingo_Restart&Git_Branch.md
+>
+> :page_facing_up: study22_ExhaustiveSearch_Greedy.md
 

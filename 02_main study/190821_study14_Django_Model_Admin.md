@@ -167,9 +167,9 @@ $ python manage.py showmigrations
 
 ###### <u>model에 관련된 실행을 할 때에는 서버를 꺼주고 관리를 하는 것이 가장 안전</u>
 
-![](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1566350979055.png)
+![](https://user-images.githubusercontent.com/52684457/63395394-88752980-c3fe-11e9-8005-6f7853d40259.png)
 
-![](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1566351101947.png)
+![](https://user-images.githubusercontent.com/52684457/63395475-d68a2d00-c3fe-11e9-9bf4-ea638cec3049.png)
 
 `python manage.py makemigrations` **=>** model에 작성한 설계도를 업데이트 하는 것
 

@@ -820,6 +820,8 @@ urlpatterns = [
 </form>
 ```
 
+- `form:` 를 입력하면 GET 이나 POST 를 바로 쓸 수 있도록 자동 완성이 된다.
+
 
 
 ###### 반응 페이지(catch)

@@ -492,6 +492,14 @@ terminal here -> install
 
 =>**Ctrl + ` 사용하면 해당 파일의 위치에서 터미널을 열어줌**
 
+
+
+###### 이 외 추천 확장자
+
+![image](https://user-images.githubusercontent.com/52684457/65212379-d2742c80-dadc-11e9-9214-bc6034c66436.png)
+
+- 코드를 이미지로 깔끔하게 저장이 가능하다.
+
 # GIT BASH
 
 1. 해당 폴더에서 git bash를 우클릭으로 실행 'git bash here'

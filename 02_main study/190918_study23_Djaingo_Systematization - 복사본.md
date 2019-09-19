@@ -120,7 +120,7 @@
 ###### REST 중심 규칙 
 
 - URI는 정보의 자원을 표현해야 한다.
-- 자원에 대한 행위는 HTTP Method로 표현한다.
+- 자원에 대한 행위는 HTTP Method로 표현한다. (즉 행위가 들어간 경로는 restful하지 않다.)
 
 **기본**
 
@@ -299,8 +299,21 @@ urlpatterns = [
 
 `get_absolute_url()` 
 
-- 특정 모델에 대해 detail view를 작성할 경우, detail url을 완성하자마자 사용하는 것을 권장한다.
+- 특정 모델에 대해 detail view를 작성할 경우
+
+- detail url을 완성하자마자 사용하는 것을 권장한다.
+
 - 반복되는 코드가 줄고 보다 간결해진다
+
+- `get_absolute_url()` 를 model에 추가하게 되면 아래와 같이 admin에서 사이트에서 보기 버튼이 생기는데,
+
+  ![image](https://user-images.githubusercontent.com/52684457/65203867-5fac8680-dac7-11e9-91ec-d6d43896976f.png)
+
+  ![image](https://user-images.githubusercontent.com/52684457/65203880-6affb200-dac7-11e9-9694-00225dfed0f9.png)
+
+  - 바로 해당 페이지로 이동할수 있는 기능이다.
+
+  
 
 `redirect(모델 인스턴스)` 를 통해서 모델 인스턴스의 get_absolute_url() 함수를 자동으로 호출
 
@@ -330,7 +343,28 @@ class Article(models.Model):
 
 - `return redirect('articles:detail', article.pk)` 를 `redirect(articles)`로 축약이 가능해진다.
 
+  ```django
+  <!-- index.html -->
+  {% extends 'base.html' %}
+  
+  {% block content %}
+  <h1 class="text-center">Articles</h1>
+  <a href="{% url 'articles:create' %}">[NEW]</a>
+  <hr>
+  {% for article in articles %}
+    <p>글 번호: {{ article.pk }}</p>
+    <p>글 제목: {{ article.title}}</p>
+    <p>글 내용: {{ article.content }}</p>
+    
+    <a href="{{ article.get_absolute_url }}">[DETAIL]</a>
+    <!-- <a href="/articles/{{article.pk}}">[DETAIL]</a> -->
+    <!-- 위, 아래 같은 코드 -->
+    <hr>
+  {% endfor %}
+  {% endblock %}
+  ```
 
+  
 
 
 

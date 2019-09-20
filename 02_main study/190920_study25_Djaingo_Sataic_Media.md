@@ -8,7 +8,7 @@
 
 
 
-![1568939316728](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1568939316728.png)
+![image](https://user-images.githubusercontent.com/52684457/65290151-fc832880-db88-11e9-878e-8475f0426162.png)
 
 - 폴더 생성위치와 이름을 잘 확인하고 넣어주어야 한다.
   - app의 static폴더는 migrations 폴더과 같은 선상에 있어야 한다.

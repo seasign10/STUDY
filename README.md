@@ -65,4 +65,10 @@
 > :page_facing_up: study21_Djaingo_Restart&Git_Branch.md
 >
 > :page_facing_up: study22_ExhaustiveSearch_Greedy.md
+>
+> :page_facing_up: study23_Djaingo_Systematization - 복사본
+>
+> :page_facing_up: study24_Djaingo_Relationship_Fields.md
+>
+> :page_facing_up: study25_Djaingo_Sataic_Media.md
 

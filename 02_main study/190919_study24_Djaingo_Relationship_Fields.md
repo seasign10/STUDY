@@ -2,6 +2,8 @@
 
 #### :key: Foreignkey
 
+*문서 내에 코드작업 중, `article_id`가 Foreignkey*
+
 ##### 개념
 
 - 외래 키는 참조하는 테이블에서 1개의 키(속성 또는 속성의 집합), 참조하는 측의 변수는 참조되는 측의 테이블의 키를 가리킨다.
@@ -456,7 +458,10 @@ urlpatterns = [
 {% endblock content %}
 ```
 
+- `onclick="return confirm('내용')"` 값을 주게되면
+  ![image](https://user-images.githubusercontent.com/52684457/65296636-05cbbf80-dba0-11e9-84d6-5d599ab0cb65.png)
 
+  실행을 하기 전, 알림창으로 실행을 할 것인지 한번 더 물어 본다.
 
 ### :balloon: comment 관련 추가 사항
 

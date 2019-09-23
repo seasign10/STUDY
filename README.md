@@ -71,4 +71,6 @@
 > :page_facing_up: study24_Djaingo_Relationship_Fields.md
 >
 > :page_facing_up: study25_Djaingo_Sataic_Media.md
+>
+> :page_facing_up: study26_DivideAndConquer_BackTracking.md
 

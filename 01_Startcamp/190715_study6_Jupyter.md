@@ -8,7 +8,7 @@ $ git pull => 강사님이 올린 자료 받기
 
 ![capture55](https://user-images.githubusercontent.com/52684457/61192026-15381380-a6ec-11e9-85c8-5152c35e30bb.PNG)
 
-### .bashrc => ~/.bashrc~/을 넣지 않으면 bachrc파일 깔린 파일에서만 명령어가 적용 됨
+### .bashrc => \~/.bashrc\~/을 넣지 않으면 bachrc파일 깔린 파일에서만 명령어가 적용 됨
 
 **환경 변수파일**을 만들었기 때문에  **source**를 해줘야 함.
 => 배쉬rc에서 쥬피터를 일일히 명령어를 길게 치는 불편함(jupyter notebook)을 줄이기 위해 jp라는 단축기를 만들어 줌
@@ -113,9 +113,11 @@ $ git pull => 강사님이 올린 자료 받기
 >
 >```
 >
+>```
+>
 >- ```
->  jupyter contrib nbextension install --user
->  ```
+>jupyter contrib nbextension install --user
+>```
 >```
 >
 >이 둘을 설치 한 후 쥬피터를 실행,

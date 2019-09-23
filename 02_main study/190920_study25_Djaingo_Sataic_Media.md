@@ -205,7 +205,7 @@ class Article(models.Model):
 
 ![image](https://user-images.githubusercontent.com/52684457/65292283-b8e0ec80-db91-11e9-91c0-f85c54fa4b01.png)
 
-- 하지만 이미지가 뜨지 않는 상황이 발생하는데, 이는 `form` 에 `*enctype*="multipart/form-data"` 을 추가해주면 된다.
+- 하지만 이미지가 뜨지 않는 상황이 발생하는데, 이는 `form` 에 `enctype="multipart/form-data"` 을 추가해주면 된다.
 
 ![image](https://user-images.githubusercontent.com/52684457/65292329-ef1e6c00-db91-11e9-8ba2-6ed22151522b.png)
 

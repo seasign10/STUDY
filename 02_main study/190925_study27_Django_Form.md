@@ -1060,6 +1060,16 @@ form.html
 
 
 
+#### :right_anger_bubble: create comment
+
+공식 문서 **=>** https://docs.djangoproject.com/en/2.2/topics/forms/modelforms/#the-save-method
+
+save() method 문서에서 해결책을 찾을 수 있다.
+
+- save()에서 바로 저장을 해버리기 때문에 수정할 틈이 없다.
+
+  ![image](https://user-images.githubusercontent.com/52684457/65584838-7c135c00-dfbc-11e9-9f69-076593ed2bee.png)
+
 
 
 

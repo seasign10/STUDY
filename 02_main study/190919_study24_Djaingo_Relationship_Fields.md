@@ -489,7 +489,17 @@ urlpatterns = [
 
 
 
+****
 
+
+
+> ###### 선택지 비율 계산을 함수에 넣기
+>
+> - radio 버튼 사용하기 
+>   - 1과 0의 선택지를 만들어서 함수 쪽에서 받는 값(`article.comment_set`)을 `len`으로 묶어서 백분율로 계산
+> - `Article.objects.order_by('?')[0]` 를 사용해서 랜덤 값을 가져올 수 있다.
+> - `Article.objects.prefetch_related('comment_set').get(pk=comment_pk)` :  `Article.objects.get(pk=comment_pk)` + `comment_set`
+> - `annotate` : 임시 DB를 만들어서 값을 가져올 수 있다. 실제 DB에 영향이 가지 않는다.
 
 
 

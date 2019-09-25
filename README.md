@@ -62,7 +62,7 @@
 >
 > :page_facing_up: study20_APS_Start
 >
-> :page_facing_up: study21_Djaingo_Restart&Git_Branch.md
+> :page_facing_up: study21_Git_Branch.md
 >
 > :page_facing_up: study22_ExhaustiveSearch_Greedy.md
 >
@@ -73,4 +73,6 @@
 > :page_facing_up: study25_Djaingo_Sataic_Media.md
 >
 > :page_facing_up: study26_DivideAndConquer_BackTracking.md
+>
+> :page_facing_up: study27_Django_Form.md
 

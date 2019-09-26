@@ -248,35 +248,37 @@ def detail(request, article_pk):
 > 서버 에러 응답 **=>** https://developer.mozilla.org/ko/docs/Web/HTTP/Status
 >
 > ```python
+> from django.http import Http404
+> 
 > def detail(request, article_pk):
->     try:
->         article = Article.objects.get(pk=article_pk)
->     except Article.DoesNotExist:
->         raise Http404('No Article matches the given query.')
->     context = {'article': article,}
->     return render(request, 'articles/detail.html', context)
+>  try:
+>      article = Article.objects.get(pk=article_pk)
+>  except Article.DoesNotExist:
+>      raise Http404('No Article matches the given query.')
+>  context = {'article': article,}
+>  return render(request, 'articles/detail.html', context)
 > ```
 >
 > ![image](https://user-images.githubusercontent.com/52684457/65564808-0510a000-df89-11e9-82dc-15fff4248038.png)
 >
 > - 이 구문을 한줄로 처리할 수 있는 방법은 아래와 같다.
 >
->   ```python
->   from django.shortcuts import render, get_object_or_404
->   
->   def detail(request, article_pk):
->       article = get_object_or_404(Article, pk=article_pk)
->       context = {'article': article,}
->       return render(request, 'articles/detail.html', context)
->   ```
+> ```python
+> from django.shortcuts import render, get_object_or_404
+> 
+> def detail(request, article_pk):
+>    article = get_object_or_404(Article, pk=article_pk)
+>    context = {'article': article,}
+>    return render(request, 'articles/detail.html', context)
+> ```
 >
->   ![image](https://user-images.githubusercontent.com/52684457/65564792-faeea180-df88-11e9-926f-5a09fcfbb52a.png)
+> ![image](https://user-images.githubusercontent.com/52684457/65564792-faeea180-df88-11e9-926f-5a09fcfbb52a.png)
 >
->   `get_object_or_404`
+> `get_object_or_404`
 >
 >   - 해당 객체가 있다면 `objects.get()`을 실행하고, 없으면 **ObjectDoesNotExist** 예외가 아닌 **Http404(HttpResponseNotFound)** 를 raise 한다.
 >
->   ###### :question: 왜 404 erre가 나올 상황에 django는 500 error를 발생시켰을까?
+> ###### :question: 왜 404 erre가 나올 상황에 django는 500 error를 발생시켰을까?
 >
 >   - `.get()` 메서드는 조건에 맞는 데이터가 없는 경우에 에러를 나타내게 설계되어 있다. **코드 단계에서 발생한 에러에 대해서는 브라우저는 500 Internal Server Error**로 인식
 >   - 클라이언트 입장에서 `서버에 오류가 발생하여 요청을 수행할 수 없다(500)` 라는 원인이 명확하지 않은 에러를 마주하기 때문에 올바른 에러를 예외처리하고 발생시키는 것 또한 개발에서 중요한 요소중 하나이다.
@@ -287,9 +289,9 @@ def detail(request, article_pk):
 > from django.shortcuts import render, get_list_or_404
 > 
 > def detail(request, article_pk):
->     article = get_list_or_404(Article) 
->     context = {'article': article,}
->     return render(request, 'articles/detail.html', context)
+>  article = get_list_or_404(Article) 
+>  context = {'article': article,}
+>  return render(request, 'articles/detail.html', context)
 > ```
 >
 > ![image](https://user-images.githubusercontent.com/52684457/65565100-e3fc7f00-df89-11e9-8936-be28bed71729.png)
@@ -1070,11 +1072,238 @@ save() method 문서에서 해결책을 찾을 수 있다.
 
   ![image](https://user-images.githubusercontent.com/52684457/65584838-7c135c00-dfbc-11e9-9f69-076593ed2bee.png)
 
+#### 
+
+##### :fountain_pen: 우선 comment를 위한 Model과 Form, admin을 작성
+
+> ###### models.py
+>
+> ```python
+> class Comment(models.Model):
+>     article = models.ForeignKey(Article, on_delete=models.CASCADE) # DB에 남기지 않겠다
+>     content = models.CharField(max_length=40)
+>     created_at = models.DateTimeField(auto_now_add=True)
+>     updated_at = models.DateTimeField(auto_now=True)
+> 
+>     class Meta:
+>         ordering = ('-pk',)
+> 
+>     def __str__(self):
+>         return self.content
+> ```
+>
+> - `makemigrations` 과 `migrate` 를 잊지 말자
+>
+> 
+>
+> ###### forms.py
+>
+> ```python
+> from .models import Article, Comment
+> # models에서 만든 Comment class를 가져온다.
+> 
+> class CommentForm(forms.ModelForm):
+> 
+>     class Meta:
+>         model = Comment
+>         fields = ('content',)
+> ```
+>
+> 
+>
+> ###### admin.py
+>
+> ```python
+> class CommentAdmin(admin.ModelAdmin):
+>     list_display = ('pk', 'content', 'created_at', 'updated_at', 'article_id',)
+> 
+> admin.site.register(Comment, CommentAdmin)
+> ```
 
 
 
+###### view.py
+
+> `def detail`
+>
+> ```python
+> from .models import Article, Comment
+> from .forms import ArticleForm, CommentForm
+> # 작성한 model과 form을 불러온다.
+> #=> Comment, CommentForm
+> 
+> def detail(request, article_pk):
+>     article = get_object_or_404(Article, pk=article_pk)
+>     comments = article.comment_set.all() # _set은 고정값 앞은 모델명 / article의 모든 댓글
+>     comment_form = CommentForm() # 댓글 폼
+>     context = {'article': article, 'comment_form': comment_form, 'comments': comments,}
+>     return render(request, 'articles/detail.html', context)
+> ```
+>
+> - 추가된 `comment_form` 과 `comments` 를 context에 추가
+>
+> 
+>
+> `def comments_create`
+>
+> ```python
+> def comments_create(request, article_pk):
+>     if request.method == 'POST':
+>         comment_form = CommentForm(request.POST)
+>         if comment_form.is_valid(): # True가 나온다면
+>             # 객체를 Create 하지만 DB에 레코드는 작성하지 않는다.
+>             comment = comment_form.save(commit=False) # comment는 만들어졌지만 save는 되지 않은상태
+>             comment.article_id = article_pk # 객체(article)를 통째로 사용하기에는 article이 만들어지지 않은 상태기 때문에 article_pk를 이용한다.
+>             comment.save()
+>     return redirect('articles:detail', article_pk)
+> ```
+>
+> 
+>
+> `def comments_delete`
+>
+> ```python
+> def comments_delete(request, article_pk, comment_pk):
+>     if request == 'POST':
+>         comment = get_object_or_404(Comment, pk=comment_pk)
+>         comment.delete
+>     return redirect('articles:detail', article_pk)
+> ```
 
 
+
+###### detail.html
+
+```python
+{% extends 'articles/base.html' %}
+
+{% block content %}
+  <h1>DETAIL</h1>
+  <hr>
+  <p>{{ article.pk }}</p>
+  <p>{{ article.title }}</p>
+  <p>{{ article.content }}</p>
+  <p>{{ article.created_at|date:"SHORT_DATE_FORMAT" }}</p>
+  <p>{{ article.updated_at|date:"M, j, Y" }}</p>
+  <a href="{% url 'articles:update' article.pk %}">[UPDATE]</a>
+  <form action="{% url 'articles:delete' article.pk %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="DELETE">
+  </form>
+  <hr>
+  <!-- 댓글 출력 -->
+  {% for comment in comments %}
+    <div>
+      댓글 {{ forloop.revcounter }} : {{ comment.content }}
+      <form action="{% url 'articles:comments_delete' article.pk comment.pk %}" method="POST"  style="display: inline;">
+        {% csrf_token %}
+        <input type="submit" value="DELETE">
+      </form>
+    </div>
+  {% empty %}
+    <p><b>댓글이 없습니다.</b></p>
+  {% endfor %}
+  <hr>
+  <!-- 댓글 입력 -->
+  <form action="{% url 'articles:comments_create' article.pk %}" method="POST">
+    {% csrf_token %}
+    {{ comment_form }}
+    <input type="submit" value="COMMENT">
+  </form>
+  <a href="{% url 'articles:index' %}">[BACK]</a>
+{% endblock content %}
+```
+
+- comment에 번호를 달고싶어서 pk값을 달게 되면 다른 게시글부터 쌓인 아이디값이 나오게 된다. 우리가 원하는 것은 게시글 내부의 댓글 번호 순이므로,
+
+  - 공식 문서 **=>** https://docs.djangoproject.com/en/2.2/ref/templates/builtins/#for
+
+    **forloop.revcounter** 를 사용하면 된다는 것을 확인할 수 있다.
+
+
+
+### :cocktail: Decorator
+
+- 외부의 기능을 이용해 장식해주는 기능
+
+- 공식 문서 **=>** https://docs.djangoproject.com/en/2.2/topics/http/decorators/
+
+  - GET방식 대신 safe를 권장
+  - POST값만 받기위해 여태사용했던 if 문은 필요없어지고 함수 위에 POST만 받는 데코레이터를 사용해줄 수 있다.
+
+  ###### views.py
+
+  ```python
+  from django.views.decorators.http import require_POST
+  
+  @require_POST
+  def delete(request, article_pk):
+      article = get_object_or_404(Article, pk=article_pk)
+      # if request.method == 'POST':
+      article.delete()
+      return redirect('articles:index')
+  
+  @require_POST
+  def comments_create(request, article_pk):
+      # if request.method == 'POST':
+      comment_form = CommentForm(request.POST)
+      if comment_form.is_valid():
+          comment = comment_form.save(commit=False) 
+          comment.article_id = article_pk
+          comment.save()
+      return redirect('articles:detail', article_pk)
+  
+  @require_POST
+  def comments_delete(request, article_pk, comment_pk):
+      # if request == 'POST':
+      comment = get_object_or_404(Comment, pk=comment_pk)
+      comment.delete
+      return redirect('articles:detail', article_pk)
+  ```
+
+  - `if POST` 가 필요 없어지게 된다.
+
+  - [`405 Method Not Allowed`](https://developer.mozilla.org/ko/docs/Web/HTTP/Status/405)
+
+    요청한 메소드는 서버에서 알고 있지만, 제거되었고 사용할 수 없습니다. 예를 들어, 어떤 API에서 리소스를 삭제하는 것을 금지할 수 있습니다. 필수적인 메소드인 `GET`과 `HEAD`는 제거될 수 없으며 이 에러 코드를 리턴할 수 없습니다.
+
+```python
+# decorator.py
+def hello(func):
+    def wrapper():
+        print('HIHI')
+        func()
+        print('hahahahaha')
+    return wrapper
+
+@hello
+def bye():
+    print('bye bye')
+
+bye()
+
+# 출력 값
+HIHI
+bye bye
+hahahahaha
+```
+
+
+
+###### admin.py
+
+```python
+# class CommentAdmin(admin.ModelAdmin):
+#     list_display = ('pk', 'content', 'created_at', 'updated_at', 'article_id',)
+
+# admin.site.register(Comment, CommentAdmin)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'content', 'created_at', 'updated_at', 'article_id',)
+```
+
+- 위의 코드를 아래의 코드로 대체하여 사용할 수 있다.
 
 
 

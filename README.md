@@ -58,7 +58,7 @@
 >
 > :page_facing_up: study18_Algorithm_List.md
 >
-> :page_facing_up: study19_Algorithm_Tree
+> :page_facing_up: ~~study19_Algorithm_Tree~~
 >
 > :page_facing_up: study20_APS_Start
 >
@@ -75,4 +75,8 @@
 > :page_facing_up: study26_DivideAndConquer_BackTracking.md
 >
 > :page_facing_up: study27_Django_Form.md
+>
+> :page_facing_up: study28_DP_and_ComputingThinking
+>
+> :page_facing_up: study29_Algorithm_Tree
 

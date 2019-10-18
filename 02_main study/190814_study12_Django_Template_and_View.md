@@ -1094,7 +1094,7 @@ MIDDLEWARE = [
 
 - csrf_token을 넣어 줌으로서 hidden타입이 생긴것을 볼 수 있다. value 값은 매번 바뀐다.
 
-![](C:\Users\student\AppData\Roaming\Typora\typora-user-images\1565925420622.png)
+![image](https://user-images.githubusercontent.com/52684457/63141163-a9650580-c01f-11e9-98b1-d09f5cc5ad0f.png)
 
 - 원래의 get방식은 값을 2가지 밖에 넘기지 못하지만 여기서 token값까지 세가지의 값이 넘어가는 것을 알 수있다.
 

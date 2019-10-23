@@ -1206,17 +1206,19 @@ CREATE INDEX "accounts_user_followers_to_user_id_6dddd47f" ON "accounts_user_fol
 ###### articles/views.py
 
 ```python
+@login_required # 비회원 팔로우 x
 def follow(request, article_pk, user_pk):
     # 게시글 유저
     person = get_object_or_404(get_user_model(), pk=user_pk)
     # 접속 유저
     user = request.user
 
-    # 내(user)가 게시글 유저(person) 팔로워 목록에 이미 존재 한다면,
-    if person.followers.filter(pk=user.pk).exists():
-        person.followers.remove(request.user)
-    else:
-        person.followers.add(user)
+    if person != user: # 회원 자기자신에게 팔로워 하지 못하게
+        # 내(user)가 게시글 유저(person) 팔로워 목록에 이미 존재 한다면,
+        if person.followers.filter(pk=user.pk).exists():
+            person.followers.remove(request.user)
+        else:
+            person.followers.add(user)
     return redirect('articles:detail', article_pk)
 
     # if user in person.follower.all():

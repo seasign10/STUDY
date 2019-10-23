@@ -1,3 +1,5 @@
+
+
 # :dog: django - User : Article
 
 `AUTH_USER_MODEL = 'auth.User'` settings.py 에서는 찾아 볼 수 없지만 이미 내부적으로 설정이 되어있기 때문에 (*default 값으로 사용할 때에는*) 굳이 기입할 필요가 없다. 
@@ -762,11 +764,797 @@ def like(request, article_pk):
 
 
 
+- 비로그인이 좋아요를 누를수 없게 방지하려면 함수 `like`위에 데코레이터 `@login_required`를 붙여준다.
 
 
-### 결과 페이지
+
+##### << 결과 페이지 >>
 
 ![image](https://user-images.githubusercontent.com/52684457/67264344-cd443c00-f4e5-11e9-825a-c43b2158eb72.png)
+
+
+
+# :person_frowning: 프로필 설정
+
+###### accounts/views.py
+
+```python
+from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+
+def profile(request, username):
+    person = get_object_or_404(get_user_model(), username=username) # 하나의 값만 가져올 때
+    context = {'person': person,}
+    return render(request, 'accounts/profile.html', context)
+```
+
+- url path **=>** `path('<username>/', views.profile, name='profile'),`
+
+- `<username>/` 이라는 주소는 임의의 문자열이기 때문에 url 최상단에 있으면 위에서 다 걸려 아래의 나머지 페이지들이 `page not found` 에러가 뜬다.
+
+
+
+> ###### 앞으로 할 것
+>
+> 1. 유저가 장성한 게시글 목록
+> 2. 유저가 작성한 댓글목록
+> 3. 정렬은 모두 최근에 작성한 것 부터
+> 4. 각 게시글의 부가정보(좋아요, 댓글의 수)
+
+
+
+- 인스턴스 person을 이용해보자.
+
+  ###### profile.html
+
+  ```django
+  {% extends 'articles/base.html' %}
+  
+  {% block content %}
+  <h1 class="text-center">{{ person.username }}'s Profile</h1>
+  <hr>
+  
+  <br>
+  <h3 class="text-center">{{ person.username }}이 작성한 글</h3>
+  {% for article in person.article_set.all %}
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">{{ article.content }}</h5>
+      <p class="card-text">{{ article.like_users.count }}명이 좋아하는 글</p>
+      <p class="card-text">{{ comments|length }}개의 댓글</p>
+      <a href="{% url 'articles:detail' article.pk %}" class="btn btn-primary">DETAIL</a>
+    </div>
+  </div>
+  {% endfor %}
+  
+  <br>
+  <h3 class="text-center">{{ person.username }}이 작성한 댓글</h3>
+  {% for comment in person.comment_set.all %}
+  <div class="card">
+    <div class="card-body">
+      <blockquote class="blockquote mb-0">
+        <p>{{ comment.content }}</p>
+        <footer class="blockquote-footer">{{ comment.created_at }}</footer>
+      </blockquote>
+    </div>
+  </div>
+  {% endfor %}
+  
+  {% endblock content %}
+  ```
+
+  - `person.article_set.all` 과 `person.comment_set.all` 는 함수 view에서 `context`로 담아서 가져와도 상관이 없다.
+  - 갯수를 세는데에는 `count`와 `length` 둘다 사용할 수 있다.
+
+
+
+```django
+{% extends 'articles/base.html' %}
+
+{% block content %}
+
+<h1 class="text-center">{{ person.username }}'s Profile</h1>
+<hr>
+<br>
+
+
+<h3 class="text-center">{{ person.username }}이 작성한 글</h3>
+<div class="row">
+  {% for article in articles %}
+  <div class="col-4 my-2">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ article.content }}</h5>
+        <p class="card-text">{{ article.like_users.count }}명이 좋아하는 글</p>
+        <p class="card-text">{{ comments|length }}개의 댓글</p>
+        <a href="{% url 'articles:detail' article.pk %}" class="btn btn-primary">DETAIL</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<br>
+<h3 class="text-center">{{ person.username }}이 작성한 댓글</h3>
+<br>
+
+<div class="row">
+  {% for comment in comments %}
+  <div class="col-4 my-2">
+    <div class="card">
+      <div class="card-body">
+        <blockquote class="blockquote mb-0">
+          <p>{{ comment.content }}</p>
+          <footer class="blockquote-footer">{{ comment.created_at }}</footer>
+        </blockquote>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock content %}
+```
+
+
+
+
+
+##### `with` template tag
+
+- 복잡한 변수를 더 간단한 이름으로 저장(캐시)하며, 여러번 DB를 조회할 때 (특히 비용이 많이 드는) 유용하게 사용 가능
+
+```python
+{% with articles=person.article_set.all %}
+  <!-- {% with person.article_set.all as article %} 과 동일 -->
+  <!-- with가 한번 조회 했기 때문에 계속 all이 조회되지 않아 반복 요청을 줄일 수 있다. -->
+  {% for article in articles %} 
+  <div class="col-4 my-2">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{ article.content }}</h5>
+        <p class="card-text">{{ article.like_users.count }}명이 좋아하는 글</p>
+        <p class="card-text">{{ comments|length }}개의 댓글</p>
+        <a href="{% url 'articles:detail' article.pk %}" class="btn btn-primary">DETAIL</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% endwith %}
+```
+
+- 하지만 조기 최적화는 프로그래밍에서 악의 근원이다.
+- 최적화 보다 중요한 것을 제쳐두고 효율적인 코드에 시간을 낭비하는것은 문제가  된다.
+  ( *코드는 코드 자체적으로도 빨라야 하지만, 더 중요한 것은 다른 개발자들이 읽기 쉬워야한다.* )
+
+
+
+##### :black_medium_small_square: nav bar
+
+- nav bar 추가 + template를 한번 더 정리 
+
+  ###### base.html
+
+  ```python
+  {% load bootstrap4 %}
+  {% load gravatar %}
+  
+  <!DOCTYPE html>
+  <html lang="ko">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://kit.fontawesome.com/e7c9242ec2.js" crossorigin="anonymous"></script>
+    {% bootstrap_css %}
+    <title>Document</title>
+  </head>
+  <body>
+    {% include 'articles/_nav.html' %}
+    
+    <div class="container">
+      {% block content %}
+      {% endblock content %}
+      {% bootstrap_javascript jquery='full' %}
+    </div>
+  </body>
+  </html>
+  ```
+
+  ###### _nav.html
+
+  ```python
+  {% load gravatar %}
+  
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <img src="https://s.gravatar.com/avatar/{{ user.email|makemd5 }}?s=80" width="30" height="30"
+      class="d-inline-block align-top" alt="img">
+    {% if user.is_authenticated %}
+    <a class="navbar-brand" href="{% url 'articles:index' %}">&nbsp; Hello, {{ user.username }}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:profile' user.username %}">활동조회</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:update' %}">정보수정</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:change_password' %}">비밀번호변경</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:logout' %}">로그아웃</a>
+        </li>
+        <li>
+          <form action="{% url 'accounts:delete' %}" class="nav-item nav-link" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="회원탈퇴" class="btn btn-danger"  onclick="return confirm('회원탈퇴를 하시겠습니까?')">
+          </form>
+        </li>
+      </ul>
+    </div>
+  {% else %}
+    <a class="navbar-brand" href="{% url 'articles:index' %}">Hello!</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+      aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+  
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:login' %}">로그인</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'accounts:signup' %}">회원가입</a>
+      </ul>
+    </div>
+  {% endif %}
+  </nav>
+  ```
+
+  - bootstrap을 활용해서 간편하게 넣자
+  - `<input type="submit" value="회원탈퇴" class="btn btn-danger"  onclick="return confirm('회원탈퇴를 하시겠습니까?')">`
+    회원탈퇴 input에 `onclick`을 넣어 실수로 회원탈퇴를 하지않도록 추가했다.
+
+  ###### (추가) detail.html / _article 을 bootstrap으로 꾸민 모습
+
+  1. ##### detail.html
+
+  ```python
+  {% extends 'articles/base.html' %}
+  
+  {% block content %}
+  <h1>DETAIL</h1>
+  <hr>
+  <p>{{ article.pk }}</p>
+  <p>작성자 : {{article.user}}</p>
+  <p>{{ article.title }}</p>
+  <p>{{ article.content }}</p>
+  <p>{{ article.created_at|date:"SHORT_DATE_FORMAT" }}</p>
+  <p>{{ article.updated_at|date:"M, j, Y" }}</p>
+  {% if request.user == article.user %}
+  <a href="{% url 'articles:update' article.pk %}" class="btn btn-primary">UPDATE</a>
+  <form action="{% url 'articles:delete' article.pk %}" method="POST" style="display: inline;">
+    {% csrf_token %}
+    <input type="submit" value="DELETE" class="btn btn-primary">
+  </form>
+  {% endif %}
+  <hr>
+  <!-- 댓글 출력 -->
+  {% for comment in comments %}
+  <div>
+    댓글 {{ forloop.revcounter }} : {{ comment.content }}
+    {% if request.user == comment.user %}
+    <form action="{% url 'articles:comments_delete' article.pk comment.pk %}" method="POST" style="display: inline;">
+      {% csrf_token %}
+      <input type="submit" value="DELETE" class="btn btn-light">
+    </form>
+    <hr>
+    {% else %}
+    댓글 {{ forloop.revcounter }} : {{ comment.content }}
+    <hr>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p><b>댓글이 없습니다.</b></p>
+  {% endfor %}
+  <hr>
+  <!-- 댓글 입력 -->
+  {% if user.is_authenticated %}
+    <form action="{% url 'articles:comments_create' article.pk %}" method="POST">
+      {% csrf_token %}
+      {{ comment_form }}
+      <input type="submit" value="COMMENT" class="btn btn-primary">
+    </form>
+  {% else %}
+    <a href="{% url 'accounts:login' %}">댓글을 작성하려면 로그인 하세요</a>
+  {% endif %}
+    <br>
+    <a href="{% url 'articles:index' %}" class="btn btn-primary">BACK</a>
+  {% endblock content %}
+  ```
+
+  2. ##### _article.html
+
+  ```python
+  <div class="card">
+    <div class="card-header">
+    작성자 : <a href="{% url 'accounts:profile' article.user %}"><b>{{ article.user }}</b></a>
+    </div>
+    <div class="card-body">
+      <h5 class="card-title">제목 : {{ article.title }}</h5>
+      <p class="card-text">{{ article.pk }} <b>번째 글</b></p>
+      <p class="card-text">
+        <a href="{% url 'articles:like' article.pk %}">
+          {% if user in article.like_users.all %}
+          <i class="fas fa-fire-alt" style="color: orange;"></i><br>
+          {% else %}
+          <i class="fas fa-fire-alt" style="color: gray;"></i><br>
+          {% endif %}
+        </a>
+        <b>{{ article.like_users.all|length }}명</b>이 이 글을 좋아합니다.
+      </p>
+  
+      <a href="{{ article.get_absolute_url }}" class="btn btn-primary">DETAIL</a>
+    </div>
+  </div>
+  
+  ```
+
+  
+
+
+
+# :rainbow: Follow
+
+[AbstractUser](https://github.com/django/django/blob/master/django/contrib/auth/models.py#L316)
+
+- `AUTH_USER_MODEL = 'auth.User'` 기본값 (*settings.py*)
+   **=>** `AUTH_USER_MODEL = 'accounts.User'`
+
+
+
+###### accounts/models.py
+
+```python
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+
+# Create your models here.
+class User(AbstractUser):
+    # django 는 맞춤 모델을 참조하는 AUTH_USER_MODEL 설정 값을  제공함으로써
+    # 기본 User 모델을 오버라이드 하도록 할 수 있다.
+    followers = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='followings')
+```
+
+
+
+- `class User` 를 생성함으로써 새로 생긴 테이블을 볼 수 있다.
+  ![image](https://user-images.githubusercontent.com/52684457/67351357-45633e00-f588-11e9-80e2-718bca3c5a76.png)
+
+  
+
+- 스키마를 확인 해보면,
+
+```sqlite
+sqlite> .schema accounts_user_followers
+CREATE TABLE IF NOT EXISTS "accounts_user_followers" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "from_user_id" integer NOUTOINCREMENT, "from_user_id" integer NOT NULL REFERENCES "accounts_user" ("id") DEFERRABL
+T NULL REFERENCES "accounts_user" ("id") DEFERRABLE INITIALLY DEFERRED, "to_user_id" integer NOT NULL REFERENCES "accounts_user"ERRABLE INITIALLY DEFERRED);
+ ("id") DEFERRABLE INITIALLY DEFERRED);
+CREATE UNIQUE INDEX "accounts_user_followers_from_user_id_to_user_id_ad929616_uniq" ON "accounts_user_followers" ("from_user_id"CREATE INDEX "accounts_user_followers_from_user_id_1e8ec42b" ON "accounts_user_followers"
+, "to_user_id");
+CREATE INDEX "accounts_user_followers_from_user_id_1e8ec42b" ON "accounts_user_followers" ("from_user_id");
+CREATE INDEX "accounts_user_followers_to_user_id_6dddd47f" ON "accounts_user_followers" ("to_user_id");
+```
+
+- `from_user_id` 와 `to_user_id` 이 생성된 것을 확인 할 수있다.
+
+
+
+- 모든 DB파일과 migrations를 지웠기 때문에 다시 `createsuperuser` 로 관리자 계정 생성 후
+
+  ###### accounts/admin.py
+
+  ```python
+  from django.contrib import admin
+  from django.contrib.auth.admin import UserAdmin
+  from .models import User
+  
+  # Register your models here.
+  admin.site.register(User, UserAdmin)
+  ```
+
+  
+
+![image](https://user-images.githubusercontent.com/52684457/67352117-0e8e2780-f58a-11e9-8b98-1b3955b26637.png)
+
+- 새로운 항목이 생긴것을 확인 가능
+
+- 하지만 페이지에서 회원가입을 하게되면 오류가 뜬다.
+
+  ![image](https://user-images.githubusercontent.com/52684457/67352270-82c8cb00-f58a-11e9-8938-aadaa32a6a16.png)
+
+- [맞춤  User 모델 대체하기](https://docs.djangoproject.com/ko/2.2/topics/auth/customizing/#substituting-a-custom-user-model)
+
+- [Custom users and the built-in auth forms](https://docs.djangoproject.com/ko/2.2/topics/auth/customizing/#custom-users-and-the-built-in-auth-forms)
+  [`UserCreationForm`](https://docs.djangoproject.com/ko/2.2/topics/auth/default/#django.contrib.auth.forms.UserCreationForm)
+
+  [`UserChangeForm`](https://docs.djangoproject.com/ko/2.2/topics/auth/default/#django.contrib.auth.forms.UserChangeForm)
+
+- 나머지 form들은 가리킬 곳을 잘 바라보고있지만 위에 두 코드는 auth user(기본유저만 바라보고 커스텀 유저를 바라보지 못 함)만 바라보고 있기 때문에 재설정 해주어야 한다.
+
+  ###### accounts/forms.py
+
+  ```python
+  # Meta 정보가 auth.user를 바라보도록 상속받아 되어있었지만 
+  # accounts.user를 바라보도록 수정하기위해서는 get_user_model()를 직접 추가해주면 된다.
+  
+  class CustomUserCreationForm(UserCreationForm):
+      class Meta(UserCreationForm):
+          model = get_user_model() #accounts.User
+          fields = UserCreationForm.Meta.fields + ('email',)
+  ```
+
+  
+
+###### articles/views.py
+
+```python
+def follow(request, article_pk, user_pk):
+    # 게시글 유저
+    person = get_object_or_404(get_user_model(), pk=user_pk)
+    # 접속 유저
+    user = request.user
+
+    # 내(user)가 게시글 유저(person) 팔로워 목록에 이미 존재 한다면,
+    if person.followers.filter(pk=user.pk).exists():
+        person.followers.remove(request.user)
+    else:
+        person.followers.add(user)
+    return redirect('articles:detail', article_pk)
+
+    # if user in person.follower.all():
+```
+
+- url **=>** `path('<int:article_pk>/follow/<int:user_pk>', views.follow, name='follow'),`
+
+- ` def detail` 에
+
+  ```python
+  def detail(request, article_pk):
+      ...
+      person = get_object_or_404(get_user_model(), pk=article.user_id) 
+      # user.pk도 가능하지만 가능한 최소화 하는게 좋다.
+  	...
+  	context = {..., ..., 'person': person,}
+      return render(request, 'articles/detail.html', context)
+  ```
+
+  **추가**
+
+![image](https://user-images.githubusercontent.com/52684457/67360088-f923f800-f59f-11e9-8b4e-a046493cc95c.png)
+
+###### detail.html
+
+```html
+{% extends 'articles/base.html' %}
+
+{% block content %}
+<h1>DETAIL</h1>
+<hr>
+<p>{{ article.pk }}</p>
+<p>작성자 : {{article.user}}</p>
+<p>{{ article.title }}</p>
+<p>{{ article.content }}</p>
+<p>{{ article.created_at|date:"SHORT_DATE_FORMAT" }}</p>
+<p>{{ article.updated_at|date:"M, j, Y" }}</p>
+{% if request.user == article.user %}
+<a href="{% url 'articles:update' article.pk %}" class="btn btn-primary">UPDATE</a>
+<form action="{% url 'articles:delete' article.pk %}" method="POST" style="display: inline;">
+  {% csrf_token %}
+  <input type="submit" value="DELETE" class="btn btn-primary">
+</form>
+{% endif %}
+<hr>
+
+<!-- 댓글 출력 -->
+{% for comment in comments %}
+<div>
+  댓글 {{ forloop.revcounter }} : {{ comment.content }}
+  {% if request.user == comment.user %}
+  <form action="{% url 'articles:comments_delete' article.pk comment.pk %}" method="POST" style="display: inline;">
+    {% csrf_token %}
+    <input type="submit" value="DELETE" class="btn btn-light">
+  </form>
+  <hr>
+  {% else %}
+  댓글 {{ forloop.revcounter }} : {{ comment.content }}
+  <hr>
+  {% endif %}
+</div>
+{% empty %}
+<p><b>댓글이 없습니다.</b></p>
+{% endfor %}
+<hr>
+
+<!-- 댓글 입력 -->
+{% if user.is_authenticated %}
+  <form action="{% url 'articles:comments_create' article.pk %}" method="POST">
+    {% csrf_token %}
+    {% comment %} {{ comment_form }} {% endcomment %}
+    {{ comment_form.content.label_tag }} &nbsp; {{ comment_form.content }}
+    <input type="submit" value="COMMENT" class="btn btn-primary">
+  </form>
+{% else %}
+  <a href="{% url 'accounts:login' %}">댓글을 작성하려면 로그인 하세요</a>
+{% endif %}
+  <hr>
+  {% include 'articles/_follow.html' %}
+  <hr>
+  <a href="{% url 'articles:index' %}" class="btn btn-primary">BACK</a>
+{% endblock content %}
+```
+
+- detail 아래에 follow 카드를 추가할 것
+  `{% include 'articles/_follow.html' %}`
+
+
+
+###### _follow.html
+
+```django
+<div class="jumbotron text-center">
+  <h1 class="display-4">{{ person.username }}</h1> <!-- article.user도 가능 -->
+  <p class="lead">
+    팔로잉 : {{ person.followings.all|length }} <br>
+    팔로워 : {{ person.followers.all|length }}
+  </p>
+  <hr class="my-4">
+  <!-- 본인은 follow 버튼을 볼 수 없다. 자기자신을 follow 불가능 -->
+  {% if user != article.user %}
+    <!-- 유저가 상대방 팔로워 목록에 없다면 -->
+    {% if user in person.follower.all %}
+    <a class="btn btn-primary btn-lg" href="{% url 'articles:follow' article.pk person.pk %}" role="button">Unfollow</a>
+    {% else %}
+    <a class="btn btn-primary btn-lg" href="{% url 'articles:follow' article.pk person.pk %}" role="button">Follow</a>
+    {% endif %}
+  {% endif %}
+</div>
+```
+
+- `with` template
+
+  ```python
+  <div class="jumbotron text-center">
+    <h1 class="display-4">{{ person.username }}</h1>
+    {% with followigns=person.followings.all followers=person.followers.all %}
+    <p class="lead">
+      팔로잉 : {{ followings|length }} <br>
+      팔로워 : {{ followers|length }}
+    </p>
+    <hr class="my-4">
+    {% if user != article.user %}
+      {% if user in followers %}
+      <a class="btn btn-primary btn-lg" href="{% url 'articles:follow' article.pk person.pk %}" role="button">Unfollow</a>
+      {% else %}
+      <a class="btn btn-primary btn-lg" href="{% url 'articles:follow' article.pk person.pk %}" role="button">Follow</a>
+      {% endif %}
+    {% endif %}
+    {% endwith %}
+  </div>
+  ```
+
+
+
+
+
+
+
+#### 최종 views.py
+
+###### accounts/views.py
+
+```python
+from IPython import embed
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import update_session_auth_hash, get_user_model
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
+from . forms import CustomUserChangeForm, CustomUserCreationForm
+from articles.models import Article, Comment
+# Create your views here.
+
+def signup(request):
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user)
+            return redirect('articles:index')
+    else:
+        form = CustomUserCreationForm()
+    context = {'form': form,}
+    return render(request, 'accounts/auth_form.html', context)
+
+
+def login(request):
+    if request.user.is_authenticated: # 인증된 유저라면
+        return redirect('articles:index')
+
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            auth_login(request, form.get_user())
+            return redirect(request.GET.get('next') or 'articles:index')
+    else:
+        form = AuthenticationForm()
+    context = {'form': form,}
+    return render(request, 'accounts/auth_form.html', context)
+
+
+def logout(request):
+    auth_logout(request)
+    return redirect('articles:index')
+
+@require_POST
+def delete(request):
+    request.user.delete()
+    return redirect('articles:index')
+
+@login_required
+def update(request):
+    if request.method == 'POST':
+        form = CustomUserChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('articles:index')
+    else:
+        form = CustomUserChangeForm(instance=request.user)
+    context = {'form': form,}
+    return render(request, 'accounts/auth_form.html', context)
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            form.save()
+            update_session_auth_hash(request, form.user)
+            return redirect('articles:index')
+    else:
+        form = PasswordChangeForm(request.user)
+    context = {'form': form,}
+    return render(request, 'accounts/auth_form.html', context)
+
+def profile(request, username):
+    person = get_object_or_404(get_user_model(), username=username)
+    context = {'person': person,}
+    return render(request, 'accounts/profile.html', context)
+```
+
+###### articles/views.py
+
+```python
+from IPython import embed
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404, HttpResponse
+from django.views.decorators.http import require_POST
+from .models import Article, Comment
+from .forms import ArticleForm, CommentForm
+
+# Create your views here.
+def index(request):
+    visits_num = request.session.get('visits_num', 0)
+    request.session['visits_num'] = visits_num + 1
+    request.session.modified = True
+    articles = Article.objects.all()
+    context = {'articles': articles, 'visits_num': visits_num,}
+    return render(request, 'articles/index.html', context)
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.user = request.user
+            article.save()
+            return redirect(article)
+    else:
+        form = ArticleForm()
+    context = {'form': form,}
+    return render(request, 'articles/form.html', context)
+
+def detail(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    comments = article.comment_set.all()
+    person = get_object_or_404(get_user_model(), pk=article.user_id)
+    comment_form = CommentForm() 
+    context = {'article': article, 'comment_form': comment_form, 'comments': comments, 'person': person,}
+    return render(request, 'articles/detail.html', context)
+
+@require_POST
+def delete(request, article_pk):
+    if request.user.is_authenticated:
+        article = get_object_or_404(Article, pk=article_pk)
+        if request.user == article.user:
+            article.delete()
+        else:
+            return redirect(article)
+    return redirect('articles:index')
+
+@login_required
+def update(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk) 
+    if request.user == article.user:
+        if request.method == 'POST':
+            form = ArticleForm(request.POST, instance=article)
+            if form.is_valid():
+                article = form.save()
+                return redirect(article)
+        else:
+            form = ArticleForm(instance=article)
+    else:
+        return redirect('articles:index')
+        context = {'form': form, 'article': article,}
+        return render(request, 'articles/form.html', context)
+
+
+@require_POST
+def comments_create(request, article_pk):
+    if request.user.is_authenticated:
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.article_id = article_pk 
+            comment.user_id = request.user.pk
+            comment.save()
+    return redirect('articles:detail', article_pk)
+
+@require_POST
+def comments_delete(request, article_pk, comment_pk):
+    if request.user.is_authenticated:
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        if request.user == comment.user:
+            comment.delete()
+            return redirect('articles:detail', article_pk)
+        else:
+            return redirect('articles:detail', article_pk)
+    return HttpResponse('You are Unauthorized', status=401)
+
+@login_required
+def like(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    if article.like_users.filter(pk=request.user.pk).exists():
+        article.like_users.remove(request.user)
+    else:
+        article.like_users.add(request.user)
+    return redirect('articles:index')
+
+
+def follow(request, article_pk, user_pk):
+    person = get_object_or_404(get_user_model(), pk=user_pk)
+    user = request.user
+    if person.followers.filter(pk=user.pk).exists():
+        person.followers.remove(request.user)
+    else:
+        person.followers.add(user)
+    return redirect('articles:detail', article_pk)
+```
 
 
 

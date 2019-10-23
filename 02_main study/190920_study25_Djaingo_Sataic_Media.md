@@ -18,6 +18,32 @@
 
 
 
+****
+
+##### app 폴더내에서 image를 관리하고 싶을 때에는?
+
+```python
+# settings.py
+
+# 실제 업로드된 파일이 저장되는 경로
+MEDIA_ROOT = os.path.join(BASE_DIR, 'app_name_folder', 'static')
+
+# url로 접근할 수 있는 가상 주소
+MEDIA_URL = '/media/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'app_name_folder', 'assets'),
+]
+```
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/67371280-1dd79a00-f5b7-11e9-9d08-5f1ada7d4b03.png)
+
+
+
+****
+
 ![image](https://user-images.githubusercontent.com/52684457/65290766-803e1480-db8b-11e9-8063-617644b558ff.png)
 
 - static 파일 적용의 예, static 이후의 경로를 적용시켜주면 된다.

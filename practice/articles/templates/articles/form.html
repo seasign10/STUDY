@@ -1,0 +1,16 @@
+{% extends 'articles/base.html' %}
+
+{% block content %}
+{% if request.resolver_match.url_name == 'create' %}
+  <h1>CREATE</h1><hr>
+{% else %}
+  <h1>UPDATE</h1><hr>
+{% endif %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <input type="submit" value="submit">
+</form>
+<a href="{% url 'articles:index' %}">BACK</a>
+{% endblock content %}

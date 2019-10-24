@@ -1,0 +1,17 @@
+{% extends 'articles/base.html' %}
+
+{% block content %}
+<h1>INDEX</h1><hr>
+<a href="{% url 'articles:create' %}">NEW</a><hr>
+{% for article in articles %}
+  <p>제목 : {{ article.title }}</p>
+  <a href="{% url 'articles:detail' article.pk %}">DETAIL</a><hr>
+  {% if user in article.like_user.all %}
+    <a href="{% url 'articles:like' article.pk %}">좋아요 취소</a>
+  {% else %}
+    <a href="{% url 'articles:like' article.pk %}">좋아요</a>
+  {% endif %}
+
+{% endfor %}
+
+{% endblock content %}

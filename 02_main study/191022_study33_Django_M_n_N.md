@@ -1560,5 +1560,456 @@ def follow(request, article_pk, user_pk):
 
 
 
+# :hash: Hashtags​ #
+
+###### articles/models.py
+
+```python
+class Hashtag(models.Model):
+        # hash가 article을 참조할 수 있게 가장 위에 작성
+        content = models.TextField(unique=True) # 같은 해시태그가 중복되면 안되므로
+
+        def __str__(self):
+            return self.content
+        
+
+
+class Article(models.Model):
+    ...
+```
+
+- `makemigrations`, `migrate` 를 하게 되면
+
+  DB에`articles_article_hashtags` 라는 중개 모델 자동생성
+
+- ##### `unique`
+
+  - True 인 경우 이 필드는 테이블 전체에서 고유한 값이어야 한다.
+  - 유효성 검사 단계에서 실행되며 중복 값이 있는 모델을 저장하려고 하면 `.save()` 메서드로 인해 `IntegrityError`가 발생
+  - `ManyToManyField` 및 `OneToOneField` 를 제외한 모든 필드 유형에서 유효
+
+
+
+###### articles/admin.py
+
+```python
+from .models import Article, Comment, Hashtag
+
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = (...)
+    
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (...)
+    
+class HashtagAdmin(admin.ModelAdmin):
+    list_display = ('content',)
+admin.site.register(Hashtag, HashtagAdmin)
+```
+
+- `class HashtagAdmin` 작성
+
+
+
+###### articles/views.py
+
+```python
+# 함수를 넣기전에...
+
+'#안녕 하세요 #저는 #누구 입니다.'.split()
+['#안녕', '하세요', '#저는', '#누구', '입니다']
+for word in list:
+    if word.startswith('#'):
+        # 기존에 있다면 .get 발동, 없다면 create하는 함수
+        #=> get_or_creaet()
+        # 리턴값 tuple
+        hashtag, created = Hashtag.objects.get_or_creaet(content=word)
+        # 새로 만들어진 것은 False 이미 있는 것은 True
+        article.hashtags.add(hashtag)
+        # created는 분리되기 때문에 hashtag값만 가져간다
+    return redirect(detail)
+```
+
+```python
+from .models import Article, Comment, Hashtag
+
+@login_required
+def create(request):
+    if request.method == 'POST':
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.user = request.user
+            article.save()
+            # Hashtag : 글이 다 작성된 이후에 해시태그가 생성 됨
+            # content를 공백 기준으로 리스트로 변경
+            for word in article.content.split(): 
+                if word.startswith('#'): # '#'으로 시작되는 요소만 선택
+                    # word랑 같은 해시태그를 찾는데 있으면 기존 객체, 
+                    # 없으면 새로운 객체를 생성
+                    hashtag, created = Hashtag.objects.get_or_create(content=word)
+                    article.hashtags.add(hashtag)
+            
+            return redirect(article)
+```
+
+- 첫번째 instance만 저장해야 하기 때문에 hashtag로만 받게되면(created없이) 튜플형식 그대로 들어오기 때문에 `add(hashtag[0])` 으로 값을 받아야 한다.
+
+- django 공식문서에서는 두가지 인스턴스를 저장하는 것을 권장한다.(*훨씬 더 안전하므로*)
+
+  
+
+##### [`get_or_create(defaults=None, **kwargs)`](https://docs.djangoproject.com/en/2.2/ref/models/querysets/#get-or-create)
+
+- 주어진 kwargs 로 객체를 찾으며 필요한 경우 하나를 만든다.
+- `(object, created)` 형태의 튜플을 **return**
+- object 는 검색 또는 생성된 객체, created는 새 객체 생성 여부를 지정하는 boolean 값
+  (*새로 만들어진 object라면 **True**, 기존에 존재하던 object라면 **False***)
+- 단, 이 method는 DB가 키워드 인자의 `unique` 옵션을 강제하고 있다고 가정하고 실행된다.
+- 이는 요청이 병렬로 작성 될 때 및 중복 코드에 대한 문제 방지로 중복 오브젝트가 작성되는 것을 예방
+
+![image](https://user-images.githubusercontent.com/52684457/67444209-047c2f80-f643-11e9-8991-a655d3cebd5f.png)
+
+- 같은 게시글 2가지 이상을 써도 중복 해시태그가 더이상 추가 되지 않는다.
+  **=>**  `get_or_create`가 처리한 일
+
+
+
+### :arrow_down_small: hashtags update
+
+- 수정 될 때는 게시글의 hashtag 전체를 삭제한 후 다시 등록하는 과정
+
+###### articles/views.py
+
+```python
+@login_required
+def update(request, article_pk):
+    article = get_object_or_404(Article, pk=article_pk)
+    if request.user == article.user:
+        if request.method == 'POST':
+            form = ArticleForm(request.POST, instance=article)
+            if form.is_valid():
+                article = form.save()
+                # hashtag
+                article.hashtags.clear() # 해당 article의 hashtag 전체 삭제
+                # for문은 create 작성할 때와 동일
+                for word in article.content.split():
+                    if word.startswith('#'):
+                        hashtag, created = Hashtag.objects.get_or_create(content=word)
+                        article.hashtags.add(hashtag)
+                return redirect(article)
+        else:
+            form = ArticleForm(instance=article)
+    else:
+        return redirect('articles:index')
+    context = {'form': form, 'article': article,}
+    return render(request, 'articles/form.html', context)
+```
+
+
+
+###### articles/views.py - `def hashtag`
+
+```python
+def hashtag(request, hash_pk):
+    hashtag = get_object_or_404(Hashtag, pk=hash_pk)
+    articles = hashtag.article_set.order_by('-pk')
+    context = {'hashtag':hashtag, 'articles':articles,}
+    return render(request, 'articles/hashtag.html', context)
+```
+
+- url `path('<int:hash_pk>/hashtag/', views.hashtag, name='hashtag'),`
+
+  ###### articles/hashtag.html
+
+  ```django
+  {% extends 'articles/base.html' %}
+  {% block content %}
+  <div class="jumbotron jumbotron-fluid text-center my-2 text-white bg-dark">
+    <div class="container">
+      <h1 class="display-4">{{ hashtag.content }}</h1>
+      <p class="lead">{{ articles|length }} 개의 게시글</p>
+    </div>
+  </div>
+  <hr>
+  <h3 class="text-center">{{ hashtag.content }} 를 태그한 글</h3>
+  <div class="row">
+    {% for article in articles %}
+    {% with likes=article.like_users.all comments=article.comment_set.all %}
+    <div class="col-4 my-2">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">{{ article.title }}</h5>
+          <p class="card-text">{{ likes|length }} 명이 좋아요</p>
+          <p class="card-text">{{ comments|length }} 개의 댓글</p>
+          <a href="{% url 'articles:detail' article.pk %}" class="btn btn-primary">보러가기</a>
+        </div>
+      </div>
+    </div>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% endblock content %}
+  ```
+
+  
+
+###### BASE_DIR/templatetags
+
+![image](https://user-images.githubusercontent.com/52684457/67446863-f3d0b700-f64c-11e9-81e9-e3079f3a5a81.png)
+
+- 폴더 최상단에 `templatetaga` 폴더 생성 후
+
+  > `templatetags`
+  > 	ㄴ`__init__.py`
+  >
+  > ​	ㄴ`make.link.py`
+
+  - 위와 같이 파일 생성
+
+  ###### make_link.py
+
+  ```python
+  from django import template
+  
+  register = template.Library() # 기본 템플릿 라이브러리에
+  
+  @register.filter
+  def hashtag_link(word):
+      # word 는 article 객체가 들어갈건데
+      # article 의 contetn 들만 모두 가져와서 그 중 해시태그에만 링크를 붙인다.
+      content = word.content + ' '
+      hashtags = word.hashtags.all()
+  
+      for hashtag in hashtags:
+          content = content.replace(hashtag.content+' ', f'<a href="/articles/{hashtag.pk}/hashtag">{hashtag.content}</a> ') # 마지막 공백 주의!!! 
+          # (과거내용, 변경내용(html a태그를 씌운 hashtag.content))
+      return content
+  ```
+
+
+
+###### detail.html
+
+```django
+{% extends 'articles/base.html' %}
+{% load make_link %}
+
+{% block content %}
+<h1>DETAIL</h1>
+...
+<p>{{ article.title }}</p>
+<p>{{ article|hashtag_link }}</p>
+<p>{{ article.created_at|date:"SHORT_DATE_FORMAT" }}</p>
+...
+{% endblock content %}
+```
+
+- `article.content`
+  **=>**  `<p>{{ article|hashtag_link }}</p>`
+
+![image](https://user-images.githubusercontent.com/52684457/67447870-39db4a00-f650-11e9-803c-dd379e710afd.png)
+
+- django는 escape 기능이 자동으로 켜져있기 때문에 꺼주어야 http가 escape를 하지 않는다.
+
+- [filter : safe](https://docs.djangoproject.com/ko/2.2/ref/templates/builtins/#safe)
+  **=>** `<p>{{ article|hashtag_link|safe }}</p>`
+
+
+
+
+
+
+
+
+
+
+
+# :key: Oauth (Social Login)
+
+**OAuth**는 인터넷 사용자들이 비밀번호를 제공하지 않고 다른 웹사이트 상의 자신들의 정보에 대해 웹사이트나 애플리케이션의 접근 권한을 부여할 수 있는 공통적인 수단으로서 사용되는, 접근 위임을 위한 개방형 표준 [django allauth](https://django-allauth.readthedocs.io/en/latest/installation.html)
+
+
+
+###### settings.py
+
+```python
+INSTALLED_APPS = [
+    'articles.apps.ArticlesConfig',
+    'accounts.apps.AccountsConfig',
+    'bootstrap4',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.kakao',
+    ...
+]
+
+SITE_ID = 1
+
+TEMPLATES = [
+    ...
+]
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
+```
+
+>     'django.contrib.sites',
+>     'allauth',
+>     'allauth.account',
+>     'allauth.socialaccount',
+>     'allauth.socialaccount.providers.kakao',
+
+
+
+###### BASE_DIR/urls.py
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('accounts/', include('accounts.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('articles/', include('articles.urls')),
+    path('admin/', admin.site.urls),
+]
+```
+
+- 이미 만들어 놓은 User app과 동일한 이름이므로, 별로 중요하지 않은 소셜 로그인 path를 2번째로 두었다.
+- 그리고 바로 `migrate`
+
+![image](https://user-images.githubusercontent.com/52684457/67448716-ce46ac00-f652-11e9-9299-1e47550581da.png)
+
+- accounts로 들어가면 후위 순위에 2번째로 넣은 accounts 주소를 볼 수 있다.
+
+
+
+[KAKAO 개발자](https://developers.kakao.com/) 사이트에 접속 후 로그인
+
+![image](https://user-images.githubusercontent.com/52684457/67448894-680e5900-f653-11e9-9e09-95b3089ea5d0.png)
+
+- 앱만들기 이후 계속 진행 버튼 클릭
+
+![image](https://user-images.githubusercontent.com/52684457/67449515-60e84a80-f655-11e9-8939-ee8f4ef421f0.png)
+
+- django 주소를 `http` `https` 두 가지 전부 입력
+
+![image](https://user-images.githubusercontent.com/52684457/67449558-81b0a000-f655-11e9-8349-411fcf13e592.png)
+
+- 사용자 관리 페이지에서 프로필, 이메일 활성화
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/67449656-d05e3a00-f655-11e9-92a6-f462ed8a8dce.png)
+
+[auth kakao](https://django-allauth.readthedocs.io/en/latest/providers.html#kakao) - **Development callback URL**
+
+- 사용자 관리 페이지에서 스크롤을 좀 더 내리면 보이는 로그인 Redirect URI에 Development callback URL 주소를 추가해준다.
+
+
+
+#### :dog: django 관리 페이지로 접속
+
+![image](https://user-images.githubusercontent.com/52684457/67449832-7a3dc680-f656-11e9-959f-83fd2090086e.png)
+
+- 소셜 어플리케이션으로 접속 후, 소셜 어플리케이션 추가
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/67449961-e6b8c580-f656-11e9-9455-22349e6d551c.png)
+
+- **클라이언트 ID**와 **시크릿키**가 필요한데 아래를 참고해서 적절한 키를 가져오면 된다.
+
+##### Client ID
+
+![image](https://user-images.githubusercontent.com/52684457/67449727-14e9d580-f656-11e9-9392-0405996771a6.png)
+
+
+
+##### Secret Key
+
+![image](https://user-images.githubusercontent.com/52684457/67449792-4f537280-f656-11e9-848c-67d002aadda3.png)
+
+
+
+[Sosial Account Tags](https://django-allauth.readthedocs.io/en/latest/templates.html#social-account-tags)
+
+> `{% load socialaccount %}`
+>
+> `<a href="{% provider_login_url "twitter" %}">Twitter</a>`
+>
+> 두 가지의 코드를 사용
+
+###### login.html
+
+```django
+{% extends 'articles/base.html' %}
+{% load bootstrap4 %}
+{% load socialaccount %}
+
+{% block content %}
+  <h1>로그인</h1><hr>
+  <form action="" method="POST">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% buttons submit='로그인' reset='Cancel' %}{% endbuttons %}
+  </form>
+  <a class="btn btn-warning" href="{% provider_login_url "kakao" %}">KAKAO</a>
+{% endblock content %}
+```
+
+
+
+###### accounts/views.py
+
+```python
+def login(request):
+    if request.user.is_authenticated:
+        return redirect('articles:index')
+
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            return redirect(request.GET.get('next') or 'articles:index')
+    else:
+        form = AuthenticationForm()
+    context = {'form': form,}
+    # return render(request, 'accounts/auth_form.html', context)
+    return render(request, 'accounts/login.html', context)
+```
+
+- `auth_form`으로 가는 경로를 `login`으로 변경
+
+
+
+- 소셜로그인을 시도하게되면
+
+> http://127.0.0.1:8000/accounts/profile/
+>
+> # Page not found (404)
+>
+> | Request Method: | GET                                     |
+> | --------------: | --------------------------------------- |
+> |    Request URL: | http://127.0.0.1:8000/accounts/profile/ |
+> |      Raised by: | accounts.views.profile                  |
+>
+> No User matches the given query.
+>
+> You're seeing this error because you have `DEBUG = True` in your Django settings file. Change that to `False`, and Django will display a standard 404 page.
+
+###### settings.py
+
+`LOGIN_REDIRECT_URL = '/accounts/profile/'` 이 기본값이기 때문에 로그인 하자마자 프로필로 자동으로 가게되어 페이지를 찾을수 없게 된다. [LOGIN_REDIRECT_URL](https://docs.djangoproject.com/en/2.2/ref/settings/#login-redirect-url)
+**=>** `LOGIN_REDIRECT_URL = 'articles:index'` 로 홈으로 가게 설정
+
+
+
+
+
+
+
 
 

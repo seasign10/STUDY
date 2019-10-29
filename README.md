@@ -81,4 +81,16 @@
 > :page_facing_up: study29_Algorithm_Tree
 >
 > :page_facing_up: study30_Algorithm_Graph
+>
+> :page_facing_up: study31_Django_SQL.md
+>
+> :page_facing_up: study31_SQL_ORM.md
+>
+> :page_facing_up: study32_Django_User.md
+>
+> :page_facing_up: study33_Django_M_n_N.md
+>
+> :page_facing_up: study34_Django_rest.md
+>
+> :page_facing_up: study35_JS_intro.md
 

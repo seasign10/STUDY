@@ -284,7 +284,7 @@ a = 10 // 할당
 console.log(a)
 ```
 
-- 이 개념은 JS 변수가 끌어 올려지거나 함수나 표현이 최상단으로 올려지는 것을 말한다.
+- 이 개념은 JS **변수**가 끌어 올려지거나 함수나 표현이 최상단으로 올려지는 것을 말한다.
 - 끌어 올려진 변수는 `undefined` 값을 반환 한다.
 - 변수와 함수를 위한 메모리 공간을 미리 확보하는 과정
 
@@ -366,16 +366,14 @@ if (x === 1) {
 
 
 
-
-
-## :electric_plug: 타입과 연산자 
+### :package: 타입과 연산자 
 
 >  ###### 타입
 >
 >  1. Primitive
 >  2. Reference
 
-### Primtive
+#### Primtive
 
 불변하다는 특징을 띄고 있다. 
 
@@ -488,7 +486,9 @@ hotelRoom = conference_room
 >   console.log(last_name) // null - 의도적으로 값이 없음을 표현
 >   ```
 
-```console
+```js
+// console
+
 typeof null
 "object"
 typeof undefined
@@ -497,7 +497,9 @@ typeof undefined
 
 
 
-```console
+```js
+// console
+
 null === undefined
 false
 null == undefined
@@ -522,17 +524,957 @@ Number.isNaN(undefined) // false
 
 
 
+> ###### 선언자를 쓰지않으면 자동으로 var가 부여된다.
+>
+> ex) `a = 1` **=>** `var a = 1`
+
+
+
+##### 할당 연산자
+
+```js
+// console
+
+let c = 0
+undefined
+c += 10
+10
+console.log(c)
+VM164:1 10
+undefined
+c -= 3
+7
+c *= 10
+70
+c++
+70
+c
+71
+c--
+71
+c
+70
+```
+
+
+
+##### 비교 연산자
+
+```js
+// console
+
+c < 30
+false
+c >=30
+true
+c === 70
+true
+
+// 소문자가 더 크다
+'A' < 'B'
+true
+'Z' < 'a'
+true
+```
+
+
+
+##### 동등 연산자
+
+```js
+// console
+
+const a = 1
+undefined
+const b = '1'
+undefined
+a == b
+true
+a != b
+false
+a == Number(b) // 자동 형변환
+true
+```
+
+> 형변환
+>
+> ```js
+> // console
+> 
+> 8 * null
+> 0
+> '5' - 1
+> 4
+> '5' + 1
+> "51"
+> 'five' * 2
+> NaN
+> a === b
+> false
+> a === Number(b)
+> true
+> ```
+
+
+
+##### 논리 연산자
+
+```js
+// console
+
+8 * null
+0
+'5' - 1
+4
+'5' + 1
+"51"
+'five' * 2
+NaN
+a === b
+false
+a === Number(b)
+true
+true && false
+false
+true && true
+true
+1 && 0
+0 // 0은 flase
+0 && 1
+0
+4 && 7
+7 // 둘다 true값(1이상) 이기 때문에 7까지 읽는다.
+false || true
+true
+false || false
+false
+1 || 0
+1
+0 || 1
+1
+4 || 7
+4 // 둘다 true값 이기 때문에 ||(or은 하나만 true여도 true)에서는 4까지만 읽는다.
+```
+
+
+
+##### 삼향 연산자
+
+- `boolean ? 첫번째 식 : 두번째 식`
+- true 는 왼쪽 false는 오른쪽 값이 출력
+
+```js
+// console
+
+true ? 1 : 2
+1
+false ? 1 : 2
+2
+
+const result = Math.PI > 4 ? 'YES' : 'NO'
+undefined
+result
+"NO"
+```
+
+
+
+### :package: 조건과 반복문
+
+```js
+// console 
+
+const userName = prompt('Hello! who r u??')
+undefined
+userName
+"haein"
+```
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/67818904-58c95880-faf6-11e9-9f2a-5d36cb07dbfc.png)
+
+```js
+// console
+
+if (userName === '1q2w3e4r') { // shift + enter
+	message = '<h1>This is admin page</h1>' // tap
+} else if ( userName === 'ssafy' ) {
+	message = '<h1>You r from ssafy</h1>'
+} else {
+	message = `<h1>Hello ${userName}</h1>` // ` 백틱
+}
+"<h1>Hello haein</h1>"
+message
+"<h1>Hello haein</h1>"
+```
+
+
+
+- ###### Document 조작 (돔 조작, 문서 조작)
+
+```js
+// console
+
+document.write(message)
+undefined
+```
+
+![image](https://user-images.githubusercontent.com/52684457/67819054-f9b81380-faf6-11e9-8a83-69fc3e358fc8.png)
+
+#### 조건문
+
+###### if / switch
+
+```js
+// console
+
+const userName = prompt('Hello Who r u?') // 1q2w3e4r 입력
+undefined
+let mass
+undefined
+let message = ''
+undefined
+switch(userName) {
+    case '1q2w3e4r': {
+		message = '<h1>this is admin</h1>'
+    }
+    case 'ssafy': {
+		message = '<h1>you r from ssafy</h1>'
+    }
+	defalt: {
+		message = `<h1>hello ${userName}</h1>`
+    }
+}
+"<h1>hello 1q2w3e4r</h1>" // 왜 첫번째 case가 출력되지 않은 것일까?
+switch(userName) {
+    case '1q2w3e4r': {
+		message = '<h1>this is admin</h1>'
+		console.log(message)
+    }
+    case 'ssafy': {
+		message = '<h1>you r from ssafy</h1>'
+		console.log(message)
+    }
+	defalt: {
+		message = `<h1>hello ${userName}</h1>`
+		console.log(message)
+    }
+}
+VM3030:4 <h1>this is admin</h1>
+VM3030:8 <h1>you r from ssafy</h1>
+VM3030:12 <h1>hello 1q2w3e4r</h1>
+// console.log 를 찍어보면 멈추지않고 끝까지 구문이 돌아서 마지막 구문이 출력된다.
+// => switch 특징
+undefined
+switch(userName) {
+    case '1q2w3e4r': {
+		message = '<h1>this is admin</h1>'
+		break // 해당 조건을 만족하면 멈추도록하는 구문을 추가
+    }
+    case 'ssafy': {
+		message = '<h1>you r from ssafy</h1>'
+		break
+    }
+	defalt: {
+		message = `<h1>hello ${userName}</h1>`
+		console.log(message)
+    }
+}
+"<h1>this is admin</h1>"
+```
+
+```js
+// if
+const userName = 'ssafy'
+
+if (userName === '1q2w3e4r') { 
+	message = '<h1>This is admin page</h1>' 
+} else if ( userName === 'ssafy' ) {
+	message = '<h1>You r from ssafy</h1>'
+} else {
+	message = `<h1>Hello ${userName}</h1>` 
+}
+
+// switch
+switch(userName) {
+  case '1q2w3e4r': {
+  message = '<h1>this is admin</h1>'
+  break 
+  }
+  case 'ssafy': {
+  message = '<h1>you r from ssafy</h1>'
+  break
+  }
+defalt: {
+  message = `<h1>hello ${userName}</h1>`
+  console.log(message)
+  }
+}
+```
 
 
 
 
 
+###### while / for
+
+```js
+// while
+let i = 0
+
+while (i < 6) { // true인 동안만 구문이 돌 것 0 1 2 3 4 5
+  console.log(i)
+  i++
+}
+
+//for
+for (let j = 0; j < 6; j++) {
+  console.log(j)
+}
+
+
+const numbers = [0, 1, 2, 3, 4, 5,]
+
+for (let number of numbers) {
+  console.log(number)
+}
+
+
+for (const number of numbers) { // 재 할당 하지 않겠다 => const
+  console.log(number)
+}
+// 전부 0, 1, 2, 3, 4, 5 가 출력
+```
 
 
 
+### :package: 함수
+
+- 파이썬에도 이름없는 익명 함수가 있다 : **lambda**
+
+```python
+def ssafy1(x):
+    return x + 1
+
+lambda x: x + 1
+ssafy2 = lambda x: x + 1
+ssafy2(2)
+
+list(map(ssafy1, [1, 2, 3])) # [2, 3, 4]
+list(map(lambda x: x+1, [1, 2, 3])) # [2, 3, 4]
+```
+
+- **JS**
+
+```js
+// 1. 선언식 (srarement, declaration)
+// 함수 선언식은 코드가 실행되기 전에 로드된다.
+function add(num1, num2) {
+  return num1 + num2
+}
+
+console.log(add(2, 7)) // 9
+
+// 2. 표현식 (expression)
+// 함수 표현식은 인터프리터가 해당 코드에 도달 했을 때 로드된다.
+const sub = function(num1, num2) { // 이름이 없는 함수 => 익명함수
+  return num1 - num2
+}
+
+console.log(sub(7, 2)) // 5
+
+console.log(typeof add) // 타입 : function
+console.log(typeof sub) // 타입 : function
+
+// Arrow Function 화살표 함수
+// 화살표 함수의 경우 일반 function 키워드로 정의한 함수와 100% 동일한 것이 아님
+// 화살표 함수는 항상 익명
+// 변수에 할당할 수 있지만, 이름 붙은 함수(생성자)로는 만들 수 없음
+const ssafy1 = function(name) {
+  return `hello, ${name}`
+}
+
+//리팩토링(refectoring)
+// 1. function 키워드 삭제
+const ssafy1 = (name) => { return `hello, ${name}` }
+
+// 2. 매개변수의 '()' 소괄호 생략 (단, 함수 매개변수가 하나일 경우만)
+const ssafy1 = name => { return `hello, ${name}` }
+
+// 3. {} && return 생략 (단, 함수의 바디에 표현식이 1개일 경우만)
+const ssafy1 = name => `hello, ${name}`
+
+// Arroe function refactoring
+let square = function(num) {
+  return num ** 2
+}
+let square = (num) => { return num ** 2 }
+let square = num => { return num ** 2 }
+let square = num => num ** 2 
+
+// 매개변수가 없다면 ? => () 나 _ 를 사용
+let noArgs = () => 'No Args'
+let noArgs = _ => 'No Args'
+
+// object(객체) 를 return 한다면
+let returnObject = () => { return {key: 'vlaue'} } // return을 명시적으로 적어준다.
+console.log(returnObject) // [Function: returnObject]
+
+// object 를 return 하는데 return을 사용하지 않을 경우 소괄호를 사용
+let returnObject = () => ({key: 'vlaue'})
+
+// object return 시 문제상황
+// 1. return이 없는데 ()를 안 쓴 경우
+let returnObject = () => {key: 'vlaue'}
+const test = returnObject()
+console.log(typeof test) // undefined (정의되지 않음)
+
+// 기본 매개변수를 줄 때는 매개변수의 개수와 상관없이 무조건 ()를 해야한다.
+const sayHello = (name='noName') => `hi ${name}`
+
+
+// Anonymous Function (익명함수 / 1회용 함수)
+// 1. 기명함수로 만들기 (변수/상수에 할당하기) - 생성과 동시에 함수의 인수로 할당
+const cube = function (num) { return num ** 3 } // 변수 할당
+const squareRoot = num => num ** 0.5
+
+console.log(cube(2)) // 8
+console.log(squareRoot(4)) // 2
+
+// 2. 익명함수 즉시 실행
+console.log((function (num) { return num ** 3 })(2)) // 8
+console.log((num => num ** 0.5)(4)) // 2
+
+// 함수 호이스팅
+ssafy() // 아래에서 선언된 것을 끌어올려 호출
+
+function ssafy() {
+  console.log('hoisting!')
+}
+
+// 변수에 할당한 함수(즉, 표현식)는 호이스팅 되지 않는다.
+// 이것은 변수의 유효범위 규칙을 따르기 때문
+// let
+ssafy2()
+
+let ssafy2 = function () {
+  console.log('hoisting!') // ReferenceError
+}
+
+// let (JS가 이해한 코드)
+let ssafy2 // 1. 변수 선언
+
+ssafy2() // 2. 함수 호출 => ssafy2는 초기화도 안되었는데 함수를 호출 (ReferenceError)
+
+ssafy2 = function () {
+  console.log('hoisting!') 
+}
+
+// var
+ssafy3()
+
+var ssafy3 = function () {
+  console.log('hoisting!') // TypeError, ssafy3 is not a function (이미 변수가 되어있어서 함수가 아님 => 초기화까지는 진행된 상태)
+}
+
+// var (JS가 이해한 코드)
+var ssafy3 // 1. 변수 선언(+초기화)
+
+ssafy3() // 2. 함수 호출 => ssafy3은 변수인데 호출 (TypeError)
+
+ssafy3 = function () {
+  console.log('hoisting!')
+}
+```
 
 
 
+## :floppy_disk: Data structure : Object & Array
+
+```js
+const numbers = [1, 2, 3, 4,]
+
+console.log(numbers[0])
+console.log(numbers[-1]) // undefined : 정확한 양의 정수 index만 가능
+console.log(numbers.length) // 4
+
+// 원본 파괴
+console.log(numbers.reverse())
+console.log(numbers) //reverse는 원본을 바꿔서 뒤집어놓는다.
+console.log(numbers.reverse()) // 한번 더 사용함으로서 원본으로 되돌려 놓음
+
+// push - 값을 집어넣지만 배열의 길이를 return
+console.log(numbers.push('a')) // 5
+console.log(numbers) // [1, 2, 3, 4, 'a']
+
+// pop - 배열의 가장 마지막 요소 제거 후 return
+console.log(numbers.pop()) // a
+console.log(numbers) // [1, 2, 3, 4]
+
+// unshift - 배열의 가장 앞에 요소를 추가, return은 배열의 길이
+console.log(numbers.unshift('a')) // a
+console.log(numbers) // ['a', 1, 2, 3, 4]
+
+// shift - 배열의 가장 앞에 요소 제거 후 return
+console.log(numbers.shift()) // a
+console.log(numbers) // [1, 2, 3, 4]
+
+// boolean return
+console.log(numbers.includes(1)) // true
+console.log(numbers.includes(0)) // false
+
+// indexOf
+console.log(numbers.push('a', 'a')) // 6
+console.log(numbers) // [1, 2, 3, 4, 'a', 'a']
+console.log(numbers.indexOf('a')) // 4 => 중복이 존재한다면 처음 찾은 요소의 index를 return
+console.log(numbers.indexOf('b')) // -1 => 찾고자 하는 요소가 없으면 -1 return
+
+// join - 배열의 요소를 join 함수의 인자를 기준으로 이어서 문자열로 return
+console.log(numbers.join()) // '1,2,3,4,a,a'  => 아무것도 넣지 않으면 ,를 기준으로 가져옴
+console.log(numbers.join('')) // '1234aa'
+console.log(numbers.join('-')) // '1-2-3-4-a-a'
+console.log(numbers) // [1, 2, 3, 4, 'a', 'a'] => 원본은 변화하지 않음
+
+```
 
 
+
+#### :yellow_heart: JOSN(JS Object Notation, JS 객체 표기법)
+
+- KEY-VALUE 형태의 자료구조를 JS 객체와 유사한 모습으로 표현하는 표기법
+- 모습만 비슷할 뿐이고 실제로 Object 처럼 사용하려면 다른 언어들 처럼 JS에서도 Parsing(구문 분석)작업이 필요
+
+> `Object` - JS 의 key - vlaue 페어의 자료 구조
+> `JSON` - 데이터를 표현하기 위한 **단순한 문자열**
+>
+> **=>** parsing 작업 필요
+
+```js
+const me = {
+  name: 'ssafy', // key가 한 단어 일 때
+  'phone number': '01012345678', // key가 여러단어 일 때
+  appleProducts: {
+    ipad: '2018pro',
+    iphone: '7',
+    macbook: '2019pro',
+  }
+}
+
+console.log(me.name) // ssafy
+console.log(me['name']) // ssafy
+console.log(me['phone number']) // key가 여러 단어인 경우 반드시 []로 접근
+
+console.log(me.appleProducts) // { ipad: '2018pro', iphone: '7', macbook: '2019pro' }
+console.log(me.appleProducts.ipad)
+
+// Object Literal (객체 표현법) 
+// ES5
+var books = ['Learning JS', 'Eloquent JS']
+
+var comics = {
+  'DC': ['Joker', 'Aquaman'],
+  'Marvel': ['Captain Marvel', 'Avengers'],
+}
+
+var magazines = null
+
+var bookShop = {
+  books: books,
+  comics: comics,
+  magazines: magazines,
+}
+console.log(bookShop)
+console.log(typeof bookShop)
+console.log(bookShop.books[0])
+
+// EX6+
+// object 의 Key 와 Value 가 같다면, 마치 배열처럼 한번만 작성 가능
+let bookShop2 = {
+  books,
+  comics,
+  magazines,
+}
+console.log(bookShop2)
+
+// JSON
+const jsonData = JSON.stringify({ // JSON => String
+  coffe: 'Americano',
+  iceCream: 'Mint Choco', // 트레일링 콤마는 JSON에서 쓸수 없다는 것을 유의 객체에서만 가능
+})
+console.log(jsonData)
+console.log(typeof jsonData) // string
+
+const parseData = JSON.parse(jsonData)
+console.log(parseData)
+console.log(typeof parseData) // object (객체)
+```
+
+
+
+#### :page_facing_up: Array Helper Method
+
+> ###### Helper 
+>
+> 자주 사용하는 로직을 재활용 할 수 있게 만든 일종의 Library
+>
+> 
+
+##### `forEach`
+
+```js
+// Array Helper Method
+// 1. forEach(callback())
+// 함수의 인자로 들어간 함수 즉, 콜백 함수 - 인자로 다른 함수에 전달 된 함수
+// 주어진 callback 을 배열에 있는 각 요소에 대해 오름차순으로 한번씩 실행
+// 아무것도 return 하지 않는다. 
+
+// ES5
+var colors = ['red', 'blue', 'green']
+
+for (var i = 0; i < colors.length; i++) {
+  console.log(colors[i])
+}
+
+// ES6
+const COLORS = [ 'red', 'blue', 'green']
+
+COLORS.forEach(function (color) {
+  console.log(color)
+})
+
+COLORS.forEach( color => console.log(color))
+
+const result = COLORS.forEach( color => console.log(color))
+console.log(result) // undefined => return 값이 없음
+```
+
+
+
+##### `map`
+
+```js
+// Array Helper Method
+
+// 2. .map(callback())
+// 배열 내의 모든 요소에 대하여 각각 주어진 함수(callback)를 호출한 결과를 모아 새로운 배열 return
+// 일정한 형식의 배열을 다른 형식으로 바꿔야 할 때 사용
+
+// for
+var numbers = [1, 2, 3,]
+var doubleNumbers = []
+
+for (var i = 0; i < numbers.length; i++) {
+  doubleNumbers.push(numbers[i] * 2)
+}
+
+console.log(doubleNumbers) // [2, 4, 6]
+console.log(numbers) // [1, 2, 3] => 원본 유지
+
+// map
+const NUMBERS = [1, 2, 3]
+
+const DOUBLE_NUMBERS = NUMBERS.map(function(number) {
+  return number * 2
+})
+console.log(DOUBLE_NUMBERS) // [2, 4, 6]
+console.log(NUMBERS) // [1, 2, 3] => 원본 유지
+
+// refectoring
+const DOUBLE_NUMBERS = NUMBERS.map( number => number * 2)
+
+
+// 2-1 연습
+const newNumbers = [4, 9, 16,]
+const roots = newNumbers.map(Math.sqrt) // sqrt - 제곱근 return
+
+console.log(roots) // [2, 3, 4]
+
+
+// 2-2 map 을 사용 -> images 배열 안의 object 들의 height 들만 저장되어 있는 heights 배열을 만드시오.
+const images = [
+  { height: '34px', width: '39px' },
+  { height: '12px', width: '11px' },
+  { height: '292px', width: '56px' },
+]
+
+const heights = images.map(function (image) {
+  return image.height
+})
+console.log(heights) // [ '34px', '12px', '292px' ]
+
+
+// 2-3  map을 사용하여 trips 배열의 값들을 계산 후 속도 값을 저장하는 배열 speeds를 만드시오
+const trips = [
+  { distance: 35, time: 10 },
+  { distance: 90, time: 10 },
+  { distance: 60, time: 25 },
+]
+
+const speeds = trips.map(function(trip) {
+  return trip.distance / trip.time
+})
+
+console.log(speeds) // [ 3.5, 9, 2.4 ]
+
+
+// 2-4
+const brands = ['Marvel', 'DC',]
+const movies = ['Iornman', 'Batman',]
+
+const comics = brands.map(function(x, i) {
+  return { name: x, hero: movies[i] }
+})
+
+console.log(comics)
+
+// [
+  //   { name: 'Marvel', hero: 'Ironman'},
+  //   { name: 'DC', hero: 'Batman'},
+// ]
+
+// refectoring
+const comics = brands.map( (x, i) => ({ name: x, hero: movies[i] }))
+```
+
+
+
+##### `filter`
+
+```js
+// Array Helper Method
+
+// 3. .filter(callback())
+// 주어진 함수의 테스트를 통과한 모든 요소를 모아 새로운 배열로 반환
+// 즉, 주어진 콜백 함수로 원하는 요소만 filtering 할 수 있다.
+// map 과 마찬가지로 원본은 유지
+
+// for
+var products = [
+  { name: 'cucumber', type: 'vegetable'},
+  { name: 'banana', type: 'fruit'},
+  { name: 'carrot', type: 'vegetable'},
+  { name: 'apple', type: 'fruit'},
+]
+
+var fruitProducts = [] // for 문으로 만들려면 빈 배열(Array))이 필요
+
+for (var i = 0; i < products.length; i++) {
+  if (products[i].type === 'fruit') {
+    fruitProducts.push(products[i])
+  }
+}
+
+console.log(fruitProducts)
+// [ { name: 'banana', type: 'fruit' }, { name: 'apple', type: 'fruit' } ]
+
+
+// filter
+const PRODUCTS = [
+  { name: 'cucumber', type: 'vegetable'},
+  { name: 'banana', type: 'fruit'},
+  { name: 'carrot', type: 'vegetable'},
+  { name: 'apple', type: 'fruit'},
+]
+
+const FRUIT_PRODUCTS = PRODUCTS.filter( function(product) {
+  return product.type === 'fruit'
+  // 해당 조건이 true를 만족할 경우에 return 
+})
+
+console.log(FRUIT_PRODUCTS)
+// [ { name: 'banana', type: 'fruit' }, { name: 'apple', type: 'fruit' } ]
+
+// refectoring
+const FRUIT_PRODUCTS = PRODUCTS.filter( product => product.type === 'fruit')
+
+
+// 3-1 연습
+// users 배열에서 admin 레벨이 true 인 user object 들만 filteredUsers 에 저장하고 
+// 배열의 두번째 유저의 이름을 출력
+const users = [
+  { id: 1, admin: false, name: 'justin'},  
+  { id: 2, admin: false, name: 'harry' },
+  { id: 3, admin: true, name: 'tak' },
+  { id: 4, admin: false, name: 'jason' },
+  { id: 5, admin: true, name: 'juan' },
+]
+
+const filteredUsers = users.filter( function(user) {
+  return user.admin === true
+})
+
+console.log(filteredUsers[1].name)
+
+// refectoring
+const filteredUsers = users.filter( user => user.admin === true)
+```
+
+
+
+##### `reduce`
+
+```js
+// Array Helper Method
+
+// 4. .reduce(callback())
+// 배열의 각 요소에 대해 주어진 reduce 함수를 실행하고, 하나의 결과 값을 반환한다.
+// reduce 는 배열 내의 숫자 총합, 평균 등 배열의 값을 하나로 줄이는 동작을 한다.
+// map은 배열의 각 요소를 변형한다면, reduce는 배열자체를 변형한다.
+
+// 총합
+const ssafyTests = [90, 90, 80, 77,]
+const sum = ssafyTests.reduce(function (total, x) {
+  return total += x
+}, 0) // return에서는 x, 0을 설정해주면 0값만 나옴 return사용시에 굳이 0을 쓰려면 중괄호 끝나는 부분에 0을 입력해주어야 함
+console.log(sum)
+
+// reduce의 첫번째 매개변수는 누적 값(전 단계의 결과, 쌓여가는 누적값) === total
+// 두번째 매개변수는 현재 배열 요소, 현재 인덱스, 배열 자체 순 === x
+// 초기값 === 0( 첫 total 값 )
+// 초기값이 생략되면 배열의 첫번째 요소가 초기값
+
+// // refectoring
+const sum = ssafyTests.reduce( (total, x) => total += x, 0) // 화살표 함수에서는 0 생략가능 (상황에 따라 써야할 때도 있음)
+console.log(sum)
+
+// 4-1 연습
+// 다음 배열 내에서 요소의 총합을 구하시오
+const arr = [0, 1, 2, 3]
+// const totalSum = arr.reduce( (total, x) => total += x, 0)
+```
+
+
+
+##### `find`
+
+```js
+// Array Helper Method
+
+// 5. .find(callback())
+// 주어진 콜백 함수를 만족하는 첫번째 요소의 값을 반환
+// 없다면 undefined 를 반환
+// 조건에 맞는 인덱스가 아니라 요소 자체를 원할 때 사용
+
+// for
+var users = [
+  { name: 'Tony Stark', age: 45 },
+  { name: 'Steve Rogers', age: 32 },
+  { name: 'Thor', age: 40 },
+  { name: 'Tony Stark', age: 23 },
+]
+
+// 원하는 object를 찾아도 users를 끝까지 돌게 된다. => 마지막 요소만 나옴
+for (var i = 0; i < users.length; i++) {
+  if (users[i].name === 'Tony Stark') {
+    user = users[i]
+    break // 원하는 조건에 도달하면 더 돌지 않는다.
+  }
+}
+console.log(user)
+
+// find
+const USERS = [
+  { name: 'Tony Stark', age: 45 },
+  { name: 'Steve Rogers', age: 32 },
+  { name: 'Thor', age: 40 },
+  { name: 'Tony Stark', age: 23 },
+]
+
+const newUser = USERS.find(user => user.name === 'Tony Stark')
+console.log(newUser)
+```
+
+
+
+##### `some` / `every`
+
+```js
+// Array Helper Method
+
+// 6. .some(callback())
+// 배열 안에 어떤 요소라도(===하나라도) 주어진 콜백함수를 통과하는 지 테스트하고, 
+// 결과에 따라 boolean을 return 
+// 빈 배열은 무조건 false를 return 
+// 조건에 맞는 요 소를 찾으면 즉시 검색을 멈추고 true 를 return
+// or 연산과 유사
+
+//some
+const arr = [1, 2, 3, 4, 5,]
+const result = arr.some(elem => elem % 2 === 0)
+console.log(result) // true 하나라도
+
+// 7. .every(callback())
+// 배열 안에 모든 요소가 주어진 콜백 함수를 통과하는지 테스트 후,
+// 결과에 따라 boolean 을 return
+// 빈 배열은 무조건 ture 를 return
+// 배열의 모 든 요소가 조건에 맞아야 true / 그렇지 않으면 false
+// 조건에 맞지 않는 요소를 찾으면 검색을 멈추고 false 를 return
+// and 연산과 유사
+
+// every
+const result2 = arr.every(elem => elem % 2 === 0)
+console.log(result2) // false 모든
+
+
+// 7-1 연습
+// for 
+// ram이 32보다 작으면 everyComputers 가 false
+// 아니면 someComputers 를 ture
+var everyComputers = true
+var someComputers = false
+
+var computers = [
+  { name: 'macbook', ram: 8},
+  { name: 'gram', ram: 16},
+  { name: 'series9', ram: 32},
+]
+
+for (var i = 0; i < computers.length; i++) {
+  var computer = computers[i]
+  if  (computer.ram < 32) {
+    everyComputers = false
+  } else {
+    someComputers = true
+  }
+}
+
+console.log(everyComputers) // false
+console.log(someComputers) // true
+
+// some / every
+var   COMPUTERS = [
+  { name: 'macbook', ram: 8},
+  { name: 'gram', ram: 16},
+  { name: 'series9', ram: 32},
+]
+
+// some
+const newSomeComputers = COMPUTERS.some( computer => computer.ram < 32 )
+console.log(newSomeComputers) // true - 하나라도 충족하기 때문에
+
+// every
+const newEveryComputers = COMPUTERS.every( computer => computer.ram < 32 )
+console.log(newEveryComputers) // flase - 모두 충족하지않아서
+```
+
+
+
+## :thumbsup: callback
+
+- 인수로 다른 함수에 전달 된 함수
+
+- 명시적으로 호출하는 방식이 아니라 **특정 이벤트가 발생했을 때** 시스템에 의해 호출되는 함수
+
+  - 다른 함수의 실행이 끝나고 난 뒤에 실행되는 함수
+
+    ```js
+    """
+     이따가 너 실행 끝나면 그때 나 좀 호출해줘.
+    """
+    ```
+
+    
+
+- 함수 호출권한을 내가 아닌 시스템이 가진다.
 

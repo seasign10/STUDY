@@ -22,7 +22,7 @@ print('End of program') # 동작하지 않게 된다. => 그때까지 코드의 
 
 
 
-## :oncoming_automobile: 비동기식 처리 모델 (Synchronous)
+## :oncoming_automobile: 비동기식 처리 모델 (Asynchronous)
 
 - 병렬적으로 태스크를 수행
 

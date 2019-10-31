@@ -93,4 +93,6 @@
 > :page_facing_up: study34_Django_rest.md
 >
 > :page_facing_up: study35_JS_intro.md
+>
+> :page_facing_up: study36_JS_Asynchronous.md
 

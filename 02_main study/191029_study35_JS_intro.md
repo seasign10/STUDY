@@ -1478,3 +1478,375 @@ console.log(newEveryComputers) // flase - 모두 충족하지않아서
 
 - 함수 호출권한을 내가 아닌 시스템이 가진다.
 
+- JS 함수는 일급 객체
+
+  1. 변수에 담을 수 있다.
+  2. 인자로 전달할 수 있다.
+  3. 반환 값으로 전달할 수 있다. (*ex.return => n+1*)
+
+
+
+##### 비동기식 처리 모델
+
+- 호출될 함수 (콜백함수)를 미리 매개변수에 전달하고 처리가 종료되면 콜백함수를 호출 하는 것.
+
+```js
+// console
+
+setTimeout(function () {
+    console.log('3초 후 출력됩니다.')
+}, 3000)
+6
+VM219:2 3초 후 출력됩니다.
+setTimeout ( () => console.log('3초'), 3000)
+7
+VM369:1 3초
+```
+
+
+
+##### 이벤트 리스너
+
+- EventTarget.addEventListener(type, listener)
+
+1. 무엇을 (버튼을) - `EventTarget`
+2. 언제 (클릭했을 때) - `type`
+3. 어떻게 (콘솔에 로그를) - `listener`
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <button id="this-button">Click Me!</button>
+  <div id="my"></div>
+  
+  <script>
+  // 1. 무엇을
+  const button = document.querySelector('#this-button')
+
+  // 2. 언제     /    어떻게(콜백함수)
+  button.addEventListener('click', function(event) {
+    console.log(event)
+    const area = document.querySelector('#my')
+    area.innerHTML ='<h1>뿅!</h1>'
+  })
+  </script>
+</body>
+</html>
+```
+
+
+
+> ######  BOM (browser object model) 
+>
+> window.confirm()
+>
+> window.print()
+>
+> window.open()
+>
+> etc...
+
+
+
+###### JS 코드를 body의 최하단에 위치하는 이유
+
+1. JS를 읽는 시간 때문에 BODY 안에 있는 HTML 요소들이 브라우저에 그려지는게 지연 될 수 있기 때문
+2.  JS 에서 특정 HTML 요소들을 읽고 이벤트를 등록해야 할 때, JS 코드가 먼저 해석되면 해당 요소가 없다고 인식되어 이벤트 등록이 되지 않을 수 있기 때문 
+
+![image](https://user-images.githubusercontent.com/52684457/67909124-76172900-fbc1-11e9-8ccf-60c9ba8ad10c.png)
+
+상위 **parent**  하위 **child**
+
+- `querySelector`  위에서 선택자로 요소를 찾으며 가장 먼저 찾아지는 요소를 반환 (단수)
+- `querySelectorAll`  위에서 부터 선택자로 요소를 찾으며 일치하는 요소들을 모두 반환 (복수)
+  - *querySe....(.classname)*
+
+```js
+// console
+
+const bg = document.querySelector('.bg')
+undefined
+bg.querySelector('#dino')
+<img id=​"dino" width=​"100px" height=​"100px" src=​"https:​/​/​is4-ssl.mzstatic.com/​image/​thumb/​Purple118/​v4/​88/​e5/​36/​88e536d4-8a08-7c3b-ad29-c4e5dabc9f45/​AppIcon-1x_U007emarketing-sRGB-85-220-0-6.png/​246x0w.jpg" alt=​"google-dino">​
+const dino = bg.querySelector('#dino')
+undefined
+dino.src
+"https://is4-ssl.mzstatic.com/image/thumb/Purple118/v4/88/e5/36/88e536d4-8a08-7c3b-ad29-c4e5dabc9f45/AppIcon-1x_U007emarketing-sRGB-85-220-0-6.png/246x0w.jpg"
+dino.id
+"dino"
+dino.src = '' // 이미지가 사라짐 (주소가 없어졌기 때문)
+""
+
+///////////////////////
+
+dino
+<img id=​"dino" width=​"100px" height=​"100px" src=​"https:​/​/​is4-ssl.mzstatic.com/​image/​thumb/​Purple118/​v4/​88/​e5/​36/​88e536d4-8a08-7c3b-ad29-c4e5dabc9f45/​AppIcon-1x_U007emarketing-sRGB-85-220-0-6.png/​246x0w.jpg" alt=​"google-dino">​
+dino.style.width = '50px'
+"50px"
+
+///////////////////////
+
+dino.remove() // 이미지 지우기
+undefined
+
+///////////////////////
+
+const bg = document.querySelector('.bg')
+undefined
+bg
+<div class=​"bg">​…​</div>​
+bg.firstElementChild.remove() // 대상의 자식요소로도 지울 수 있다.
+undefined
+
+//=> bg.lastElementChild.remove() 마지막 자식요소 삭제
+
+const bg = document.querySelector('.bg') // 부모 선택
+undefined
+const dino = document.querySelector('#dino') // 자식 선택
+undefined
+bg.removeChild(dino) // 부모의 입장에서 원하는 자식의 요소 바로 삭제
+
+///////////////////////
+
+const bg = document.querySelector('.bg')
+undefined
+const dino = document.querySelector('#dino')
+undefined
+const newDino = document.createElement('img')
+undefined
+newDino
+<img>​
+newDino.src = 'https://images.homedepot-static.com/productImages/832b5bfb-c0c2-4250-855b-a4cac169ac02/svn/design-toscano-garden-statues-qm2728000-64_1000.jpg'
+"https://images.homedepot-static.com/productImages/832b5bfb-c0c2-4250-855b-a4cac169ac02/svn/design-toscano-garden-statues-qm2728000-64_1000.jpg"
+newDino
+<img src=​"https:​/​/​images.homedepot-static.com/​productImages/​832b5bfb-c0c2-4250-855b-a4cac169ac02/​svn/​design-toscano-garden-statues-qm2728000-64_1000.jpg">​
+newDino.alt = 'dino'
+"dino"
+newDino.id = 'dino'
+"dino"
+newDino.style.width = '100px'
+"100px"
+newDino.style.height = '100px'
+"100px"
+newDino
+<img src=​"https:​/​/​images.homedepot-static.com/​productImages/​832b5bfb-c0c2-4250-855b-a4cac169ac02/​svn/​design-toscano-garden-statues-qm2728000-64_1000.jpg" alt=​"dino" id=​"dino" style=​"width:​ 100px;​ height:​ 100px;​">​
+
+bg.append(newDino) // 설정한 newDino를 doc에 집어넣기
+undefined
+
+///////////////////////
+```
+
+![image](https://user-images.githubusercontent.com/52684457/67909958-68af6e00-fbc4-11e9-8af9-eeffdd7e5d39.png)
+
+
+
+```js
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Document</title>
+  <style>
+    .bg {
+      background-color: #f7f7f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg">
+    <img id="dino" width="100px" height="100px"
+      src="https://is4-ssl.mzstatic.com/image/thumb/Purple118/v4/88/e5/36/88e536d4-8a08-7c3b-ad29-c4e5dabc9f45/AppIcon-1x_U007emarketing-sRGB-85-220-0-6.png/246x0w.jpg"
+      alt="google-dino" />
+  </div>
+
+  <script>
+    const dino = document.querySelector('#dino')
+    dino.addEventListener('click', function() {
+      console.log('아야!')
+    })
+  </script>
+</body>
+
+</html>
+```
+
+- dino를 클릭하면 console에 아야! 가 뜬다.
+
+
+
+> ######  [Event](https://developer.mozilla.org/ko/docs/Web/Events) - 키보드 이벤트를 사용해보자.
+>
+> - keydown
+>
+>   콘솔 창에서 위아래 좌우를 누르면 나오는 코드를 상세보기하여 코드를 잘 따라 치자
+>   ![image](https://user-images.githubusercontent.com/52684457/67910964-0f493e00-fbc8-11e9-84eb-a6ac6c322f88.png)
+>
+>   `console.log('left')`
+>
+>   `console.log(dino.style)` **=>** `dino.style.marginRight = '20px'`
+>
+>   예를들어 오른쪽에 margin 값을 주면 왼쪽으로 가는 것 처럼 보인다.
+>
+>   ![image](https://user-images.githubusercontent.com/52684457/67911078-81218780-fbc8-11e9-8204-ba452b3a07f2.png)
+>
+>   ![image](https://user-images.githubusercontent.com/52684457/67911090-8d0d4980-fbc8-11e9-96e1-52bd321b872e.png)
+>
+>   하지만 한번만 움직이고 고정이된다. 계속 움직이게 하려면 ?
+>
+>   ```js
+>   <!DOCTYPE html>
+>   <html lang="en">
+>   
+>   <head>
+>     <meta charset="UTF-8" />
+>     <title>Document</title>
+>     <style>
+>       .bg {
+>         background-color: #f7f7f7;
+>         display: flex;
+>         justify-content: center;
+>         align-items: center;
+>         min-height: 100vh;
+>       }
+>     </style>
+>   </head>
+>   
+>   <body>
+>     <div class="bg">
+>       <img id="dino" width="100px" height="100px"
+>         src="https://is4-ssl.mzstatic.com/image/thumb/Purple118/v4/88/e5/36/88e536d4-8a08-7c3b-ad29-c4e5dabc9f45/AppIcon-1x_U007emarketing-sRGB-85-220-0-6.png/246x0w.jpg"
+>         alt="google-dino" />
+>     </div>
+>   
+>     <script>
+>       const dino = document.querySelector('#dino')
+>       let x = 0 // x 좌우 값
+>       let y = 0 // y 상하 값
+>   
+>       document.addEventListener('keydown', function(e) {
+>         // console.log(e)
+>         if (e.key === ' ') {
+>           console.log('spacebar')
+>         } else if (e.code === 'ArrowLeft') {
+>           console.log('left')
+>           x -= 20
+>           dino.style.marginLeft = `${x}px`
+>           // console.log(dino.style)
+>         } else if (e.code === 'ArrowUp') {
+>           console.log('up')
+>           y -= 20
+>           dino.style.marginTop = `${y}px`
+>         } else if (e.keyCode === 39) {
+>           console.log('right')
+>           x += 20
+>           dino.style.marginLeft = `${x}px` 
+>           // marginLeft를 기준으로 값이 +- 주어져야 움직임이 확실하다.
+>           // marginRight값을 주면 서로 각 값이 들어가서 방향이 이상해진다.
+>         } else if (e.code === 'ArrowDown') {
+>           console.log('down')
+>           y += 20
+>           dino.style.marginTop = `${y}px`
+>           // marginLeft와 동일하게 marginTop값 으로만 상하를 조절
+>         } else {
+>           console.log('잘못된 키')
+>         }
+>       })
+>       
+>     </script>
+>   </body>
+>   
+>   </html>
+>   ```
+>
+>   
+>
+>   ###### [Event](https://developer.mozilla.org/ko/docs/Web/Events) - 마우스 오버를 사용해보자 (추가)
+>
+>   ```js
+>       dino.style.position = 'absolute'
+>       dino.addEventListener('mouseover', function () {
+>         // (현재 윈도우 너비 * 난수) - (현재 위도우 너비)
+>         // Math.random() 0~1 사이의 난수
+>         const newWidth = window.innerWidth * Math.random() - window.innerWidth
+>         const newHeight = window.innerHeight * Math.random() - window.innerHeight
+>   
+>         dino.style.marginLeft = newWidth + 'px'
+>         dino.style.marginTop = newHeight + 'px'
+>       })
+>   ```
+
+
+
+#### :shopping: shoppin list
+
+![image](https://user-images.githubusercontent.com/52684457/67914028-4d4b5f80-fbd2-11e9-9efb-c2b5d447cbf7.png)
+
+```js
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <h1>My Shopping List</h1>
+  Enter a new item: <input type="text" id="item-input">
+  <button id="add-button">Add Item</button>
+  
+  <ul id="shopping-list">
+
+
+  </ul>
+
+  <script>
+    const input = document.querySelector('#item-input')
+    const button = document.querySelector('#add-button')
+    const shoppingList = document.querySelector('#shopping-list')
+
+    button.addEventListener('click', function() {
+      const itemName = input.value
+      input.value = '' // 물건을 담고 초기화를 시켜주어야 기존의 value값이 사라지고 그 다음 값을 받을 수 있음
+      
+      // item 변수에 li 태그 객체를 담기
+      const item = document.createElement('li')
+      // item에 itemNmae을 담는다.
+      item.innerText = itemName
+      // ul 태그(shoppingList)의 마지막에 item(li 태그)을 자식요소로 추가
+      shoppingList.append(item)
+
+      // 1. Delete 버튼 태그 추가
+      const deleteButton = document.createElement('button')
+
+      // 2. deleteButton 변수에 텍스트 추가
+      deleteButton.innerText = 'Delete'
+
+      // 3. 각각의 item(li 태그)에 deleteButton 을 마지막 요소로 추가
+      item.append(deleteButton)
+
+      // 4. deleteButton 을 누르면 item을 삭제
+      deleteButton.addEventListener('click', function() {
+        item.remove()
+      })
+    })
+  </script>
+  
+</body>
+</html>
+```
+

@@ -1,0 +1,37 @@
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {% bootstrap_css %}
+  <title>Document</title>
+</head>
+<body>
+  <div class="container">
+    <h3>
+      Hello, {{ user.username }}
+      {% if user.is_authenticated %}
+      <a href="{% url 'accounts:update' %}">회원정보수정</a>
+      <form action="{% url 'accounts:change_password' %}" style="display: inline;">
+        {% csrf_token %}
+        <input type="submit" value="비밀번호 수정">
+      </form>
+      <a href="{% url 'accounts:logout' %}" >로그아웃</a>
+      <form action="{% url 'accounts:delete' %}" style="display: inline;">
+      {% csrf_token %}
+      <input type="submit" value="회원탈퇴">
+      </form>
+      {% else %}
+      <a href="{% url 'accounts:signup' %}">회원가입</a>
+      <a href="{% url 'accounts:login' %}">로그인</a>
+      {% endif %}
+    </h3>
+    <hr>
+    {% block content %}
+    {% endblock %}
+  </div>
+  {% bootstrap_javascript jquery='full' %}
+</body>
+</html>

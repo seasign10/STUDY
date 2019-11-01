@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1 class="text-center">Articles</h1>
+  {% if user.is_authenticated %}
+  <a href="{% url 'articles:create' %}">[NEW]</a>
+  {% else %}
+  <a href="{% url 'accounts:login' %}">[글을 작성하려면 로그인이 필요합니다.]</a>
+  {% endif %}
+  <hr>
+  {% for article in articles %}
+    <p>글 번호: {{ article.pk }}</p>
+    <p>글 제목: {{ article.title }}</p>
+    <p>글 내용: {{ article.content }}</p>
+    <a href="{% url 'articles:detail' article.pk %}">[DETAIL]</a>
+    <hr>
+  {% endfor %}
+{% endblock %}

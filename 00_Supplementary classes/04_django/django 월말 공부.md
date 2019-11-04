@@ -12,7 +12,7 @@
 
 5. `pip install django` **django** 설치
 
-6. `django-admin startproject articles .` **app 생성**
+6. `django-admin startproject crud .` **app 생성**
 
    - app 이름 : <u>articles</u>, <u>account</u> (*user app*)
 

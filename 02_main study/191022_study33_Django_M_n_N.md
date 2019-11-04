@@ -20,7 +20,7 @@
 
      `settings.AUTH_USER_MODEL`
 
-     - **return 값** : srt
+     - **return 값** : str
 
 3. `App_Config` 의 `ready()` 메서드를 실행한다.
 

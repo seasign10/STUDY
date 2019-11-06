@@ -4,7 +4,9 @@
 
 - JS의 비동기적 시스템을 적용
 
+![image](https://user-images.githubusercontent.com/52684457/68275637-95292580-00af-11ea-8644-d1406610764a.png)
 
+- 들어가기 앞서 이 설정을해두면 저장할때마다 (ctrl+s) 자동으로 코드를 정리해준다.
 
 ### XMLHttpRequest (XHR)
 
@@ -1681,7 +1683,7 @@ computed: {
 >
 > 1. kebab-case - `todo-list`
 >    - 호출 할 때: `<todo-list></todo-list>` 
->      <u>케밥케이스</u>로만 호출 가능
+>        <u>케밥케이스</u>로만 호출 가능
 > 2. pskalCase - `TodoList`
 >    - 호출 할 때 : `<todo-list></todo-list>` / `<todo-list>` 
 >    - 단, DOM 에 직접 작성할 때는 케밥케이스만 가능
@@ -1781,6 +1783,12 @@ computed: {
 
 ![image](https://user-images.githubusercontent.com/52684457/68186328-3d26ec00-ffe7-11e9-882a-94c9ea9d4017.png)
 
+
+
+#### 최종본
+
+- shortcut까지 적용 시킨 모습
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -1874,6 +1882,716 @@ computed: {
 
 </html>
 ```
+
+
+
+## :large_blue_circle: Module
+
+###### `webpack`
+
+![image](https://user-images.githubusercontent.com/52684457/68270118-ad914400-009f-11ea-944b-417237029b8d.png)
+
+- 웹팩은 현재 가장 널리 쓰이는 번들러
+- JS뿐만 아니라, CS, IMAGE 파일 리소스의 의존성들도 관리한다.
+
+> #### 모듈
+>
+> - 어플리케이션을 구성하는 개별적 요소
+> - 재사용 가능한 코드 조각
+> - 모듈은 세부사항을 캡슐화
+> - 특정 기능을 갖는 작은 코드 단위
+>
+> #### 모듈번들러
+>
+> - 웹 어플리케이션을 구성하는 자원(HTML, CSS, IMG 등)을 모두 각각의 모듈로 보고 이를 조합해서 병합된 하나의 결과물로 만드는 도구
+
+> 개발을 편하게 모듈 단위 개발 
+> **=>** 모듈끼리 연결(의존성)을 신경쓰기가 어려워짐 
+> **=>** 웹팩으로 하나로 만듦
+
+```bash
+$ npm init
+```
+
+- 전부 스킵(enter)하면 기본 값 파일이 생성 된다.
+
+```json
+{
+  "name": "02_view_webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vue": "^2.6.10"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  }
+}
+```
+
+
+
+```bash
+$ npm install vue
+```
+
+- vue 설치
+
+
+
+```bash
+$ npm i webpack webpack-cli -D
+```
+
+- webpack 설치
+- `-D` : 개발모드
+
+
+
+> ###### 생성 된 파일 목록
+>
+> :file_folder: node_modules(folder)
+> ㄴ .bin
+> ㄴ ...
+> :open_file_folder: package-lock.json
+> :open_file_folder: package.json
+> :open_file_folder: webpack.config.json **=>** 직접 생성
+
+
+
+> ###### webpack.config.json 작성하기
+>
+> ```js
+> // webpack 설정 파일
+> 
+> module.exports = {
+>   entry: {
+>     // __dirname : 최상의 위치(entry point) - Django 에서 BASE_DIR
+>     app: path.join(__dirname, 'src', 'main.js')
+>   },
+>   module: {},
+>   plugins: [],
+>   output: {
+>     filename: 'app.js',
+>     path: path.join(__dirname, 'dist'),
+>   },
+> }
+> ```
+>
+> 최상위 폴더 위치에서 **src** 폴더 생성
+>
+> :file_folder: src
+> ㄴApp.vue
+> ㄴmain.js
+
+
+
+###### webpack.config.json
+
+```js
+// webpack 설정 파일
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const path = require('path')
+
+module.exports = {
+  entry: {
+    // __dirname : 최상의 위치(entry point) - Django 에서 BASE_DIR
+    app: path.join(__dirname, 'src', 'main.js')
+  },
+  module: {
+    rulse: [{ // .은 전역이기 때문에 /\을 앞에 사용해주어야 한다. 
+      test: /\.vue$/, // 정규 표현식 : '.vue' 확장자를 가진 모든 파일
+      use: 'vue-loader',
+    }]
+  },
+  plugins: [
+    new VueLoaderPlugin(),
+  ],
+  output: {
+    filename: 'app.js',
+    path: path.join(__dirname, 'dist'),
+  },
+}
+```
+
+
+
+###### `entry`
+
+- 여러 js 파일들의 시작점 **=>** 웹팩이 파일을 읽어 들이기 시작하는 부
+
+
+
+###### `module`
+
+- 웹팩은 JS만 변환 가능하기 때문에 html, css 등은 모듈을 통해서 웹팩이 이해할수 있도록 변환이 필요
+- 변환 내용을 담는 곳
+
+
+
+###### `plugins`
+
+- 웹팩을 통해서 번들된 결과물을 추가 처리하는 부분
+
+
+
+###### `output`
+
+- 여러 js 파일을 **하나로 만들어 낸 결과물**
+
+
+
+> **webpack은 js 코드만 이해 가능**하기 때문에 vue파일(vue-loader) 및 html, css 파일(vue-template-compiler) 등을 변환하기 위하여 **모듈을 설치**
+>
+> ```bash
+> $ npm install vue-loader vue-template-compiler -D
+> ```
+
+
+
+###### main.js
+
+```js
+// Vue 인스턴스를 최종으로 만드는 파일
+
+// 1. 설치된 vue 를 추가
+// (내가 만든 파일이 아닌 경우) 현재 위치에서 vue 이름을 가진 폴더가 없음 => 자동으로 node_modules 에서
+import Vue from 'vue'
+
+// 2. 최상위 컴포넌트 추가
+// (내가 만든 파일) 상대 경로 표시
+import App from './App.vue'
+
+// new Vue({
+//   render: function (createElement) {
+//     return createElement()
+//   }
+// })
+new Vue({
+  render: h => h(App)
+}).$mount('#app') // el: '#app'와 기능적으로 같으나 지금 방법이 더 유연하여 선호됨
+```
+
+
+
+###### App.vue
+
+- vbase
+
+```js
+<template> 
+  <h1>여기는 최상위 컴포넌트 입니다.</h1>
+</template>
+
+<script>
+
+</script>
+
+<style>
+
+</style>
+```
+
+- 우리가 필요한 것은 이 세가지 항목
+
+
+
+> **package.json** 에서
+>
+>  `"test": "echo \"Error: no test specified\" && exit 1"`
+>
+> 대신
+>
+> `"build": "webpack"` 추가
+>
+> ```json
+> {
+>   "name": "02_view_webpack",
+>   "version": "1.0.0",
+>   "description": "",
+>   "main": "index.js",
+>   "scripts": {
+>     "build": "webpack" // 추가(혹시나 json파일에서 주석은 사용안하는 것을 권장)
+>   },
+>   "author": "",
+>   "license": "ISC",
+>   "dependencies": {
+>     "vue": "^2.6.10"
+>   },
+>   "devDependencies": {
+>     "vue-loader": "^15.7.2",
+>     "vue-template-compiler": "^2.6.10",
+>     "webpack": "^4.41.2",
+>     "webpack-cli": "^3.3.10"
+>   }
+> }
+> ```
+
+
+
+```bash
+$ npm run build
+```
+
+- 설정이 다 끝났다면 webpack을 작성해준다.
+
+
+
+> ###### 생성 된 파일 목록
+>
+> :file_folder: dist **=>** 자동 생성!​ (`run build` 시에 생성 됨)
+> :file_folder: node_modules(folder)
+> ㄴ .bin
+> ㄴ ...
+> :file_folder: src
+> ㄴApp.vue
+> ㄴmain.js
+> :open_file_folder: package-lock.json
+> :open_file_folder: package.json
+> :open_file_folder: webpack.config.json
+> :file_folder: public **=>** 직접 생성
+> ㄴindex.html
+
+
+
+###### index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="app">
+
+
+  </div>
+
+  <script src="../dist/app.js"></script> <!-- 경로 설정 -->
+</body>
+
+</html>
+```
+
+```js
+// webpack.config.js
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const path = require('path')
+module.exports = {
+  mode: 'development', // => mode 추가!
+    ...
+```
+
+- 설정 후 다시 `npm run build`
+
+![image](https://user-images.githubusercontent.com/52684457/68274152-ac661400-00ab-11ea-9a09-600a5ccf8c2c.png)
+
+- 다시 창을 켜보면 view를 사용할 수 있게 된다.
+
+
+
+> 최상 컴포넌트 (App.vue)
+>
+> 하위 컴포넌트 (TodoList.vue)
+
+**=>** src(source) 폴더에 component 폴더 안에 하위폴더인 TodoList.vue 생성
+
+
+
+######  TodoList.vue
+
+- vbase순으로
+  template => script => style 순으로 작성
+
+```vue
+<template>
+  <div class="todo-list">
+    <h2>{{ category }}</h2>
+    <input type="text" v-model="newTodo" @keyup.enter="addTodo" />
+    <button @click="addTodo">+</button>
+    <li v-for="todo in todos" v-bind:key="todo.id">
+      <span>{{ todo.content }}</span>
+      <button @click="removeTodo(todo.id)">x</button>
+    </li>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    category: {
+      type: String,
+      required: true,
+      validator: function(value) {
+        if (value.length < 5) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  },
+  data: function() {
+    return {
+      todos: [],
+      newTodo: ""
+    };
+  },
+  methods: {
+    addTodo: function() {
+      if (this.newTodo.length !== 0) {
+        this.todos.push({
+          id: Date.now(),
+          content: this.newTodo,
+          completed: false
+        });
+        this.newTodo = "";
+      }
+    },
+    removeTodo: function(todoId) {
+      this.todos = this.todos.filter(todo => {
+        return todo.id !== todoId;
+      });
+    }
+  }
+};
+</script>
+
+<style>
+.todo-list {
+  display: inline-block;
+  width: 33%;
+}
+</style>
+```
+
+- 위의 코드는 해당 문서의 **최종본 목록**으로 가서 그대로 가져온 값이다.
+- 어떤 코드를 긁어왔는지 잘 비교해보자
+
+
+
+### :walking_man: 컴포넌트 등록 3 steps (App.vue)
+
+1. `<script>` 에 등록할 컴포넌트 불러오기 (import)
+2. `export default` 에 `components` 항목에 추가
+3. `<template>` 에서 컴포넌트 사용할 수 있도록 등록
+
+###### App.vue
+
+```vue
+<template>
+  <div>
+    <!-- 컴포넌트 사용 시 덩어리를 구분하는 div가 필요 -->
+    <!-- 3. 컴포넌트 등록 -->
+    <h1>여기는 최상위 컴포넌트 입니다.</h1>
+
+    <todo-list category="취업특강"></todo-list>
+    <todo-list category="SSAFY"></todo-list>
+    <todo-list category="기타"></todo-list>
+  </div>
+</template>
+
+<script>
+// 1. 하위 컴포넌트 불러오기
+import TodoList from "./components/TodoList.vue";
+
+// 2. 불러온 컴포넌트를 최상위(부모) 컴포넌트에 등록
+export default {
+  components: {
+    TodoList // 자식(하위) 컴포넌트들이 이 뒤로 계속 작성 됨
+  }
+};
+</script>
+
+<style>
+</style>
+```
+
+
+
+```bash
+$ npm install vue-style-loader css-loader -D
+```
+
+- 두가지의 모듈 설치 후
+
+###### package.json
+
+```json
+...
+  "devDependencies": {
+    "css-loader": "^3.2.0", // 추가된 모듈 두가지를 확인 할 수 있다.
+    "vue-loader": "^15.7.2",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.10",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  }
+}
+
+```
+
+###### webpack.config.js
+
+```js
+module.exports = {
+  mode: 'development',
+  entry: {
+    ...
+  module: {
+    rules: [ 
+      {
+        test: /\.vue$/, 
+        use: 'vue-loader',
+      },
+      {
+        test: /\.css/,
+        use: ['vue-style-loader', 'css-loader'] // 여러개는 배열로 작성
+      }
+    ]
+  ...
+}
+```
+
+- `'vue-style-loader'`, `'css-loader'` 모듈을 사용하겠다는 코드를 작성
+
+- `npm run build`  빌드를 다시 재설정 해준다.
+
+
+
+**[vue cli](https://cli.vuejs.org/guide/installation.html#installation)**
+
+- **새로운 폴더에 설치**를 해보자
+
+```bash
+$ npm i -g @vue/cli
+```
+
+- `i` : install
+- `g` : global
+
+```bash
+$ vue --version
+@vue/cli 4.0.5
+```
+
+
+
+```bash
+$ vue create todo-vue-cli
+
+
+Vue CLI v4.0.5
+? Please pick a preset: default (babel, eslint) 
+
+
+Vue CLI v4.0.5
+✨  Creating project in C:\Users\student\Desktop\수업\TIL\...
+⚙  Installing CLI plugins. This might take a while...
+
+
+> yorkie@2.0.0 install C:\Users\student\Desktop\수업\TIL\...
+> node bin/install.js
+
+setting up Git hooks
+can't find .git directory, skipping Git hooks installation
+
+> core-js@3.3.6 postinstall C:\Users\student\Desktop\수업\TIL\...
+> node postinstall || echo "ignore"
+
+
+> core-js-pure@3.3.6 postinstall C:\Users\student\Desktop\수업\TIL\...
+> node postinstall || echo "ignore"
+
+added 1128 packages from 822 contributors and audited 24120 packages in 34.096s
+found 0 vulnerabilities
+
+🚀  Invoking generators...
+📦  Installing additional dependencies...
+
+added 56 packages from 44 contributors and audited 24407 packages in 8.518s
+found 0 vulnerabilities
+
+⚓  Running completion hooks...
+
+📄  Generating README.md...
+
+🎉  Successfully created project todo-vue-cli.
+👉  Get started with the following commands:
+
+ $ cd todo-vue-cli
+ $ npm run serve
+```
+
+-  `cd todo-vue-cli` 후
+   `npm run serve` 서버를 켜보면
+
+```bash
+student@DESKTOP ~/Desktop/수업/TIL/... (master)
+$ cd todo-vue-cli
+
+student@DESKTOP ~/Desktop/수업/TIL/.../todo-vue-cli (master)
+$ npm run serve
+
+> todo-vue-cli@0.1.0 serve C:\Users\student\Desktop\수업\TIL\...\todo-vue-cli
+> vue-cli-service serve
+
+ INFO  Starting development server...
+
+  App running at:
+  - Local:   http://localhost:8080/
+  - Network: http://...:8080/
+
+  Note that the development build is not optimized.
+  To create a production build, run npm run build.
+```
+
+- vue 서버가 열린 것을 확인 할 수 있다.
+
+![image](https://user-images.githubusercontent.com/52684457/68277180-04a01480-00b2-11ea-8047-3de1066fb971.png)
+
+- 자동생성된 파일 목록들
+
+- 직접 웹팩 작업을 할 때 있던 webpack.comfig.js 가 보이지 않는데 선택적 숨김파일 설정이 되어있다.(내장으로 들어가있음) 건드리기 위해서는 최상위에 직접 사용자가 만들어야 한다.
+- `vue.config.js` 는 vue-cli 에 의해 자동으로 로드되는 선택적 구성 파일로 변경되었다.
+- vue-cli 3 버전부터 노출되지 않으며, 설정을 추가하기 위해서는 루트 디렉토리에 직접 파일을 만들고 작성해야 한다.
+
+![image](https://user-images.githubusercontent.com/52684457/68278227-3c0fc080-00b4-11ea-8c61-cf69f4e03ee0.png)
+
+- 이 경로에 설정 파일이 있다.
+- 정확히는 package.json 의 `"@vue/cli-service": "^4.0.0",` 구문
+
+
+
+- 이곳에서 이전에 작성한 파일내용을 옮겨주자.
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <todo-list category="취업특강"></todo-list>
+    <todo-list category="SSAFY"></todo-list>
+    <todo-list category="기타"></todo-list>
+  </div>
+</template>
+
+<script>
+import TodoList from "./components/TodoList.vue";
+
+export default {
+  name: "app",
+  components: {
+    TodoList
+  }
+};
+</script>
+
+<style>
+#app {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
+```
+
+
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <h2>{{ category }}</h2>
+    <input type="text" v-model="newTodo" @keyup.enter="addTodo" />
+    <button @click="addTodo">+</button>
+    <li v-for="todo in todos" v-bind:key="todo.id">
+      <span>{{ todo.content }}</span>
+      <button @click="removeTodo(todo.id)">x</button>
+    </li>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    category: {
+      type: String,
+      required: true,
+      validator: function(value) {
+        if (value.length < 5) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  },
+  data: function() {
+    return {
+      todos: [],
+      newTodo: ""
+    };
+  },
+  methods: {
+    addTodo: function() {
+      if (this.newTodo.length !== 0) {
+        this.todos.push({
+          id: Date.now(),
+          content: this.newTodo,
+          completed: false
+        });
+        this.newTodo = "";
+      }
+    },
+    removeTodo: function(todoId) {
+      this.todos = this.todos.filter(todo => {
+        return todo.id !== todoId;
+      });
+    }
+  }
+};
+</script>
+
+<style>
+.todo-list {
+  display: inline-block;
+  width: 33%;
+}
+</style>
+```
+
+- component에 새로 vue파일을 이렇게 만들어 주자. 
+  (내용은 그대로 가져온 것)
+
+- `npm run build` 후 `npm run serve` 로 서버를 켜주면 링크가 뜬다. 로컬 링크로 들어가면 적용된 페이지가 잘 뜨는 것을 확인 할 수 있다. (이전에는 index.html에서 open browser 함)
+
+ :star: **(tip)** 서버를 끈 후 터미널에 `vue ui` 코드를 입력하면 프로젝트를 조금더 쉽게 관리할 수 있는 페이지를 제공한다.
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68278988-d8869280-00b5-11ea-8a81-fffdd8abcbb8.png)
+
+- 현재는 하나의 tamplate구간만 짠 상태
+
+  
 
 
 

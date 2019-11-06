@@ -95,4 +95,6 @@
 > :page_facing_up: study35_JS_intro.md
 >
 > :page_facing_up: study36_JS_Asynchronous.md
+>
+> :page_facing_up: study37_Django_Vue.md
 

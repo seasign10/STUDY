@@ -2591,7 +2591,1360 @@ export default {
 
 - 현재는 하나의 tamplate구간만 짠 상태
 
-  
+
+
+
+
+
+## :small_red_triangle_down: Search 
+
+```bash
+$ vue create youtube-browser
+```
+
+```bash
+$ cd youtube-browser/
+```
+
+- 설치 후 생성된 `youtube-browser` 폴더로 이동
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <search-bar></search-bar>
+  </div>
+</template>
+
+<script>
+import SearchBar from './components/SearchBar'
+export default {
+  name: 'App', // 최상단 컴포넌트기 때문에 이름이 없어도 되지만 명시적으로 작성한다.
+  components: {
+    SearchBar,
+  }
+}
+</script>
+
+<style>
+</style>
+```
+
+- 컴포넌트의 추가할 vue를 import, tag 가져오기 (`search-bar`)
+
+
+
+****
+
+### :red_circle: SearchBar
+
+1. 사용자가 input 에 값을 입력하면 oninput 함수가 실행
+2. inputChange 이벤트와 사용자가 입력한 value 가 함께 상위 컴포넌트인 App.vue로 emit 된다.
+
+### :red_circle: App
+
+
+
+3. SearchBar 에서 넘어온 이벤트 inputChange 로 인해 oninputChange 함수가 실행된다
+4. oninputChange 함수는 유튜브 api에 요청을 보내고 비디오 리스트를 응답 받는다.
+
+****
+
+
+
+###### component/SearchBar.vue
+
+```vue
+<template>
+  <div>
+    <input @input="onInput" type="text">
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'SearchBar',
+    methods: {
+      onInput(e) {
+        console.log(e)
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- input값을 부여 v-on(`@`), 사용 할 methods 추가
+
+
+
+```bash
+error: Unexpected console statement (no-console) at src\components\SearchBar.vue:12:9:
+  10 |     methods: {
+  11 |       onInput(e) {
+> 12 |         console.log(e)
+     |         ^
+  13 |       }
+  14 |     }
+  15 |   }
+```
+
+- 개발모드에서는 유출이되면 안되기 때문에 evevt의 console이 막혀있다.
+
+```json
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+```
+
+- package.json 에서 `rules` 설정값을 `"no-console": "off"` 로 준다.
+
+
+
+- 서버를 재 시작한 후 콘솔에서 새로고침을 하면
+
+  **=>** `target.value` 에 입력값을 확인 할 수 있다.
+
+![image](https://user-images.githubusercontent.com/52684457/68555216-e6e6fc80-046f-11ea-91c7-6abd1623e330.png)
+
+
+
+#### 사용자가 검색어 입력(SearhcBar)
+
+**=>** 검색 결과를 App.vue로 올려줌
+
+
+
+###### SearchBar.vue
+
+```vue
+<script>
+  export default {
+    name: 'SearchBar',
+    methods: {
+      onInput(e) {
+        this.$emit('inputChange', e.target.value)
+      }
+    }
+  }
+</script>
+```
+
+- `'inputChange'` : 이벤트 이름
+- `e.target.value` : 데이터 (arguments)
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68555216-e6e6fc80-046f-11ea-91c7-6abd1623e330.png)
+
+- 값을 하나하나 받는 것을 알 수 있다. (아직 부모로 값을 보내진 않은 상태)
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68555336-a176ff00-0470-11ea-926f-2bda8b01d0c4.png)
+
+- vue로 확인한 이벤트 발생
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <!-- inputChange 이벤트가 일어나면 onInputChange 라는 method 가 실행 됨 -->
+    <search-bar @inputChange="onInputChange"></search-bar>
+  </div>
+</template>
+
+<script>
+import SearchBar from './components/SearchBar'
+export default {
+  name: 'App', 
+  components: {
+    SearchBar,
+  },
+  methods: {
+    onInputChange(inputValue) {
+      console.log(inputValue)
+    }
+  }
+}
+</script>
+```
+
+- `@inputChange="onInputChange"` 추가
+- `onInputChange` method 추가 후 console로 확인
+
+![image](https://user-images.githubusercontent.com/52684457/68555444-2530eb80-0471-11ea-8365-0bc3c2171e40.png)
+
+- 부모도 값을 하나씩 받는 것을 확인 할 수 있다.
+
+
+
+### 단방향 데이터 흐름의 이점
+
+1. vue.app의 데이터 흐름을 쉽게 파악할 수 있음
+2. 부모 컴포넌트에서 업데이트가 일어나면 자식컴포넌트는 자동 업데이트 (즉, 자식 컴포넌트의 상태를 관리하지 않아도 된다.)
+3. 하위 컴포넌트가 실수로 부모의 상태를 변경하려 app 데이터의 흐름을 추론하기 어렵게 만드는 것을 방지할 수 있다.
+
+- 하위에서 상위로 데이터를 올려 보낼 때는 Event 를 발생 시키는 방법을 사용 (`emit`)
+- `props` 는 배열, 객체, 함수 등 무엇이든 내려보내는 **속성(properties)**이고, `emit event` 는 자식에서 부모로 **이벤트를 발생** 시키는 것
+
+
+
+- #### SearchBar => App
+
+1. 트리거 : input 값 변경(@input)
+   - 인자 : event
+   - 실행 함수 : oninput
+2. 트리거 : input 내 #emit (inputChange)
+   - 인자 : 변경된 값
+   - 실행 함수 : outputChange
+
+
+
+#### :rocket: [구글 개발자 콘솔](https://console.developers.google.com/) 
+
+- 새 프로젝트를 만든 후, API 및 서비스 사용설정에서 `YouTube Data API v3` 을 사용 할 것
+- 사용자 인증 정보에서 웹브라우저, 공용으로 설정 후 키를 발급 (유출 조심)
+- 최대 만번 정도의 요청을 보낼 수 있는데, 만약 초과를 했다면 새 프로젝트를 만들어 서비스 사용설정을 다시 한 후, 새로운 프로젝트로 다시 설정을 바꿔주면 된다. (서버를 다시 껐다 켜야 함)
+- API 및 서비스 항복 아래에서 사용하고 있는  API를 클릭해서 들어가면 할당량 목록에서 얼마나 요청을 보냈는지 값을 알 수 있다.
+
+```bash
+$ npm i axios
+```
+
+- axios 확장자 설치
+
+
+
+###### App.vue
+
+```vue
+<script>
+import axios from 'axios'
+import SearchBar from './components/SearchBar'
+const API_KEY = '발급 받은 키'
+const API_URL = ''
+...
+```
+
+- axios 를 `import`, 발급 받은 키를 `API_KEY` 로 입력
+
+- URL 은 [https://www.googleapis.com/youtube/v3/search(문서)](https://developers.google.com/youtube/v3/docs/search/list) 로 요청하면 된다.
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68556667-87401f80-0476-11ea-8b80-696b2d9cac4d.png)
+
+- 위의 문서링크에서 필수 매개변수를 확인하면 part 가 있는 것을 확인 가능
+
+- ![image](https://user-images.githubusercontent.com/52684457/68556875-4b598a00-0477-11ea-9b53-99e4c1136d10.png)
+
+  `q` : `string` 매개변수는 검색할 검색어를 지정합니다.
+
+
+
+###### App.vue
+
+```vue
+<script>
+    ...
+export default {
+  name: 'App',다.
+  components: {
+    SearchBar,
+  },
+  methods: {
+    onInputChange(inputValue) {
+      axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          type: 'video',
+          part: 'snippet',
+          q: inputValue,
+        }
+      })
+        .then(response => {
+          console.log(response)
+        })
+        .catch(error => {
+          console.log(error)
+        }) // 함수 vs 함수기 때문에 arrow function 사용
+    }
+  }
+}
+</script>
+```
+
+- `.env.local` 파일 생성 (최상단)
+
+- 자동으로 gitignore 에 evv.local 이 있기 때문에 값만 넣어주면 된다.
+
+- 내용은 무조건 `VUE_APP_` (접두사) 로 시작해야 한다.
+
+  **=>** `const API_KEY = process.env.VUE_APP_YOUTUBE_API_KEY`
+
+  이로서 키 값의 직접적인 노출을 막을 수 있게 되었다.
+
+
+
+****
+
+### :red_circle: VideoList​ 
+
+5. 넘겨 받은 비디오 리스트를 videos 라는 배열에 저장
+6. `data` object 가 (videos 배열이 있는 곳) 업데이트 되면, 해당 컴포넌트 (App.vue) 가 템플릿을 다시 렌더링 한다.
+7. 그리고 바로 자식 컴포넌트들도 모두 다시 렌더링 된다.
+8. `VideoList`컴포넌트가 비디오 배열을 받아 화면에 보여주게 된다.
+
+****
+
+- component에서 VideoList.vue 추가
+
+###### component/VideoList.vue
+
+```vue
+<template>
+  <!-- list 로 띄울 것이기 때문에 div 대신 ul 태그 -->
+  <ul>
+    VideoList
+  </ul>
+</template>
+
+<script>
+  export default {
+    name: 'VideoList',
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <search-bar @inputChange="onInputChange"></search-bar>
+      
+    <!-- 추가 -->
+    <video-list></video-list>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import SearchBar from './components/SearchBar'
+    
+// component import
+import VideoList from './components/VideoList'
+    
+const API_KEY = process.env.VUE_APP_YOUTUBE_API_KEY
+const API_URL = 'https://www.googleapis.com/youtube/v3/search'
+
+export default {
+  name: 'App', // 최상단 컴포넌트기 때문에 이름이 없어도 되지만 명시적으로 작성한다.
+  components: {
+    SearchBar,
+    VideoList, // component 등록
+  },
+  data() {
+    return { // return 값을 할 때에는 모든 객체가 return되기 때문에 객체를 한번 더 감싸서 구분을 주어야 한다. (component 의 data만)
+      videos: [],
+    }
+  },
+  methods: {
+```
+
+- vue component 에서는 반드시 Object 를 return 하는 함수로 작성
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <search-bar @inputChange="onInputChange"></search-bar>
+
+    <!--오른쪽에서 왼쪽으로 할당, 왼쪽의 videos는 다르게 써도 상관 없지만 오른쪽의 "videos"는 이미 우리가 지정한 name이기 때문에 이름 그대로 써야 한다. -->
+    <video-list :videos="videos"></video-list>
+  </div>
+</template>
+
+<script>
+    ...
+methods: {
+    onInputChange(inputValue) {
+      axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          type: 'video',
+          part: 'snippet',
+          q: inputValue,
+        }
+      })
+        .then(response => {
+          // console.log(response)로 확인한 데이터 경로를 videos에 담아준다.
+          this.videos = response.data.items
+        })
+        .catch(error => {
+          ...
+```
+
+
+
+###### VideoList
+
+```vue
+<template>
+  <!-- list 로 띄울 것이기 때문에 div 대신 ul 태그 -->
+  <ul>
+    VideoList
+    {{ videos.length }}
+  </ul>
+</template>
+
+<script>
+  export default {
+    name: 'VideoList',
+  props: {
+    videos: {
+      type: Array,
+      required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+![image](https://user-images.githubusercontent.com/52684457/68561759-4b16ba00-048a-11ea-9dfc-617fc2170343.png)
+
+
+
+****
+
+### :red_circle: VideoListItem.vue
+
+
+
+
+
+###### component/VideoListItem.vue
+
+```vue
+<template>
+  <li>
+    {{ video.snippet.title }}
+  </li>
+</template>
+
+<script>
+  export default {
+    name: 'VideoListItem',
+    props: {
+      video: {
+        type: Object,
+        required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+###### VideoList.vue
+
+```vue
+<template>
+  <!-- list 로 띄울 것이기 때문에 div 대신 ul 태그 -->
+  <ul>
+    <video-list-item v-for="video in videos" :key="video.etag" :video="video"></video-list-item>
+  </ul>
+</template>
+
+<script>
+  import VideoListItem from './VideoListItem'
+
+  export default {
+    name: 'VideoList',
+    components: {
+      VideoListItem,
+    },
+  props: {
+    videos: {
+      type: Array,
+      required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68561996-2c64f300-048b-11ea-9d81-f096a2907fde.png)
+
+- public **=>** index.html 의 head 위에 bootstrap CSS 적용
+
+  ```html
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  ```
+
+
+
+###### SearchBar.vue
+
+```vue
+<style scoped>
+  /* scoped => 이 vue에만 bootstrap css 적용 */
+  input {
+    width: 75%;
+  }
+
+  div {
+    text-align: center;
+    margin: 20px;
+  }
+</style>
+```
+
+- 적용할 때 scoped를 적용해야 해당 vue만 bootstrap의 CSS를 적용할 수 있다.
+
+- VideoList 의 ul 태그를 `<ul class="list-group">` 
+- VideoListItem 의 li 태그를 `<li class="list-group-item">`
+  로 class를 준다.
+
+
+
+CSS가 적용된 화면
+
+![image](https://user-images.githubusercontent.com/52684457/68562398-ca0cf200-048c-11ea-8749-973128af9cea.png)
+
+
+
+###### VideoListItem.vue
+
+```vue
+<template>
+  <li class="list-group-item">
+    <img :src="video.snippet.thumbnails.default.url" alt="img">
+    {{ video.snippet.title }}
+  </li>
+</template>
+
+<script>
+  export default {
+    name: 'VideoListItem',
+    props: {
+      video: {
+        type: Object,
+        required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68562526-7353e800-048d-11ea-91d1-f723a28cb086.png)
+
+- 미리 캐싱을 하게되면 쿼리를 보내는 횟수를 줄일 수 있다.
+  **=>** `computed`
+
+
+
+###### VideoListItem.vue
+
+```vue
+<template>
+  <li class="list-group-item">
+    <img :src="thumbnailUrl" alt="img">
+    <div class="media-body"></div>
+    {{ video.snippet.title }}
+  </li>
+</template>
+
+<script>
+  export default {
+    name: 'VideoListItem',
+    props: {
+      video: {
+        type: Object,
+        required: true,
+      },
+    },
+    computed: {
+      thumbnailUrl(){
+        return this.video.snippet.thumbnails.default.url
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  li {
+    display: flex; /* 유동적으로 (사이즈를 비율에 맞게) */
+    cursor: pointer; /* 가져다 대면 커서를 손가락 모양으로 */
+  }
+
+  li:hover {
+    background-color: #eee; /* 마우스를 올렸을때 색상이 바뀌도록 hover */
+  }
+</style>
+```
+
+- computed 에서 만든 `thumbnailUrl` 를 :src 에 넣어준다.
+
+![image](https://user-images.githubusercontent.com/52684457/68562794-874c1980-048e-11ea-86db-8b03cf66230a.png)
+
+
+
+###### VideoListItem.vue
+
+```vue
+<template>
+  <li @click="onVideoSelect" class="list-group-item">
+    <img :src="thumbnailUrl" alt="img">
+    <div class="media-body"></div>
+    {{ video.snippet.title }}
+  </li>
+</template>
+
+<script>
+  export default {
+    name: 'VideoListItem',
+    props: {
+      video: {
+        type: Object,
+        required: true,
+      },
+    },
+    methods: {
+      onVideoSelect() {
+        // 인자가 없이 때문에 this.video
+        this.$emit('videoSelect', this.video)
+      }
+    },
+    computed: {
+      thumbnailUrl(){
+        return this.video.snippet.thumbnails.default.url
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  li {
+    display: flex;
+    cursor: pointer;
+  }
+
+  li:hover {
+    background-color: #eee;
+  }
+</style>
+```
+
+
+
+###### VideoList
+
+```vue
+<template>
+  <!-- list 로 띄울 것이기 때문에 div 대신 ul 태그 -->
+  <ul class="list-group">
+    <!-- 태그 안의 내용이 길 경우에는 enter로 줄바꿈을 함으로서 깔끔하게 정리해준다. -->
+    <video-list-item 
+    v-for="video in videos" 
+    :key="video.etag" 
+    :video="video"
+    @videoSelect="onVideoSelect">
+    </video-list-item>
+  </ul>
+</template>
+
+<script>
+  import VideoListItem from './VideoListItem'
+
+  export default {
+    name: 'VideoList',
+    components: {
+      VideoListItem,
+    },
+  methods: {
+    onVideoSelect(video) {
+      // 받을 인자가 있기 때문에 this.video가 아닌 video
+      this.$emit('videoSelect', video)
+    }
+  },
+  props: {
+    videos: {
+      type: Array,
+      required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <!-- inputChange 이벤트가 일어나면 onInputChange 라는 method 가 실행 됨 -->
+    <search-bar @inputChange="onInputChange"></search-bar>
+
+    <!--오른쪽에서 왼쪽으로 할당, 왼쪽의 videos는 다르게 써도 상관 없지만 오른쪽의 "videos"는 이미 우리가 지정한 name이기 때문에 이름 그대로 써야 한다. -->
+    <video-list @videoSelect="onVideoSelect" :videos="videos"></video-list>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import SearchBar from './components/SearchBar'
+import VideoList from './components/VideoList'
+const API_KEY = process.env.VUE_APP_YOUTUBE_API_KEY
+const API_URL = 'https://www.googleapis.com/youtube/v3/search'
+
+export default {
+  name: 'App', // 최상단 컴포넌트기 때문에 이름이 없어도 되지만 명시적으로 작성한다.
+  components: {
+    SearchBar,
+    VideoList,
+  },
+  data() {
+    return { // return 값을 할 때에는 모든 객체가 return되기 때문에 객체를 한번 더 감싸서 구분을 주어야 한다. (component 의 data만)
+      videos: [],
+    }
+  },
+  methods: {
+    onVideoSelect(video) {
+      // data가 최종적으로 app.vue까지 올라왔는지 확인 해보기 위해 
+      console.log(video)
+    },
+    onInputChange(inputValue) {
+      axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          type: 'video',
+          part: 'snippet',
+          q: inputValue,
+        }
+      })
+        .then(response => {
+          this.videos = response.data.items
+        })
+        .catch(error => {
+          console.log(error)
+        }) // 함수 vs 함수기 때문에 arrow function 사용
+    }
+  }
+}
+</script>
+
+<style>
+</style>
+
+```
+
+
+
+
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68563841-41915000-0492-11ea-97ef-2605e8786316.png)
+
+- 데이터가 타고타고 올라오는 것을 볼 수 있다.
+
+
+
+****
+
+### :red_circle: VideoDetail
+
+
+
+###### VideoDetail.vue
+
+```vue
+<template>
+  <div"video">
+    {{ video.snippet.title }}
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'VideoDetail',
+    props: {
+      video: {
+        type: Object,
+        // video 선택이 안될수도 있기 때문에 required는 생략 (null이 나올수도 있음)
+      }
+    }
+  }
+</script>
+```
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <!-- inputChange 이벤트가 일어나면 onInputChange 라는 method 가 실행 됨 -->
+    <search-bar @inputChange="onInputChange"></search-bar>
+
+    <!-- 값을 넘겨받은 selectedVideo를 바인드 -->
+    <video-detail :video="selectedVideo"></video-detail>
+
+    <video-list @videoSelect="onVideoSelect" :videos="videos"></video-list>
+  </div>
+</template>
+
+<script>
+...
+import VideoDetail from './components/VideoDetail'
+...
+export default {
+  name: 'App',
+  components: {
+    SearchBar,
+    VideoList,
+    VideoDetail,
+  },
+  data() {
+    return { 
+      videos: [],
+      selectedVideo: null,
+    }
+  },
+  methods: {
+    onVideoSelect(video) {
+      // 최종적으로 video를 받은 다음에 selectedVideo로 넘긴다.
+      this.selectedVideo = video
+    },
+    onInputChange(inputValue) {
+      axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          type: 'video',
+          part: 'snippet',
+          q: inputValue,
+        }
+      })
+        .then(response => {
+          this.videos = response.data.items
+        })
+        .catch(error => {
+          console.log(error)
+        }) // 함수 vs 함수기 때문에 arrow function 사용
+    }
+  }
+}
+</script>
+
+<style>
+</style>
+
+```
+
+
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68564484-1871bf00-0494-11ea-8372-525ac9d82891.png)
+
+- 새로 고침(아무런 값이 들어가지 않았을 때) null값이 들어가게 되면서 에러가 뜬다. error를 지워보자.
+
+
+
+###### VideoDetail.vue
+
+```vue
+<template>
+  <!-- video 값이 true 일 때만 돌도록 -->
+  <div v-if="video">
+    <div class="details">
+      <h4>{{ video.snippet.title }}</h4>
+      <p>{{ video.snippet.description }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'VideoDetail',
+    props: {
+      video: {
+        type: Object,
+      }
+    }
+  }
+</script>
+
+<style scoped>
+    /* 페이지를 좀더 둥글둥글하게 만들기 위해 */
+  .details {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+</style>
+```
+
+
+
+- 영상을 띄워 보자 **=>** `iframe` 사용
+
+[embed 문서](https://developers.google.com/youtube/iframe_api_reference)
+
+![image](https://user-images.githubusercontent.com/52684457/68564820-faf12500-0494-11ea-8e87-731f0927f918.png)
+
+
+
+###### VideoDetail.vue
+
+```vue
+<template>
+  <!-- video 값이 true 일 때만 돌도록 -->
+  <div v-if="video">
+      <iframe :src="videoUrl" frameborder="0"></iframe>
+  </div>
+</template>
+
+<script>
+  export default {
+	...
+    computed: {
+      videoUrl() {
+        const videoId = this.video.id.videoId
+        // return this.data
+        return `http://www.youtube.com/embed/${videoId}`
+      }
+    }
+  }
+</script>
+```
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/68564980-7d79e480-0495-11ea-8a5d-09ddab9d236b.png)
+
+- VideoDetail에 있는 id값을 이용
+
+
+
+****
+
+### :heavy_check_mark: BootStrap을 사용하여 template 정리
+
+###### VideoDetail.vue
+
+```vue
+<template>
+  <div v-if="video" class="col-lg-8">
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe :src="videoUrl" frameborder="0" class="embed-responsive-item"></iframe>
+    </div>
+  </div>
+</template>
+```
+
+
+
+###### VideoList.vue
+
+```vue
+<template>
+  <ul class="col-lg-4 list-group">
+    <video-list-item 
+    v-for="video in videos" 
+    :key="video.etag" 
+    :video="video"
+    @videoSelect="onVideoSelect">
+    </video-list-item>
+  </ul>
+</template>
+```
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <search-bar @inputChange="onInputChange"></search-bar>
+     
+    <!-- col을 사용한 태그들을 row div로 감싼다. -->
+    <div class="row">
+      <video-detail :video="selectedVideo"></video-detail>
+      <video-list @videoSelect="onVideoSelect" :videos="videos"></video-list>
+    </div>
+  </div>
+</template>
+```
+
+
+
+
+
+- #### browser > lg
+
+![image](https://user-images.githubusercontent.com/52684457/68566513-eb280f80-0499-11ea-873c-ea87e3406535.png)
+
+
+
+- #### browser < lg
+
+![image](https://user-images.githubusercontent.com/52684457/68566542-03982a00-049a-11ea-9439-825230fbd673.png)
+
+
+
+****
+
+
+
+#### :page_facing_up: 최종본
+
+###### VideoDetail.vue
+
+- col값을 주기위해 div 로 한번 감싼다.
+- 그 위에 row 값을 준 div도 필요하기 때문에 app.vue에서 태그를 row값으로 감싸주자.
+
+```vue
+<template>
+  <!-- video 값이 true 일 때만 돌도록 -->
+  <div v-if="video" class="col-lg-8">
+    <div class="embed-responsive embed-responsive-16by9">
+      <iframe :src="videoUrl" frameborder="0" class="embed-responsive-item"></iframe>
+    </div>
+    <div class="details">
+      <!-- html형식으로 title을 넣어주어야 글씨 깨짐이 없다. -->
+      <h4 v-html="video.snippet.title"></h4>
+      <p>{{ video.snippet.description }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'VideoDetail',
+    props: {
+      video: {
+        type: Object,
+        // video 선택이 안될수도 있기 때문에 required는 생략 (null이 나올수도 있음)
+      }
+    },
+    computed: {
+      videoUrl() {
+        const videoId = this.video.id.videoId
+        // return this.data
+        return `http://www.youtube.com/embed/${videoId}`
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .details {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+</style>
+```
+
+
+
+###### VideoListItem.vue
+
+```vue
+<template>
+  <li @click="onVideoSelect" class="list-group-item">
+    <img :src="thumbnailUrl" alt="img">
+    <div class="media-body" v-html="video.snippet.title"></div>
+    {{ video.snippet.title }}
+  </li>
+</template>
+
+<script>
+  export default {
+    name: 'VideoListItem',
+    props: {
+      video: {
+        type: Object,
+        required: true,
+      },
+    },
+    methods: {
+      onVideoSelect() {
+        // 인자가 없이 때문에 this.video
+        this.$emit('videoSelect', this.video)
+      }
+    },
+    computed: {
+      thumbnailUrl(){
+        return this.video.snippet.thumbnails.default.url
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  li {
+    display: flex;
+    cursor: pointer;
+  }
+
+  li:hover {
+    background-color: #eee;
+  }
+</style>
+```
+
+
+
+###### VideoList.vue
+
+```vue
+<template>
+  <!-- list 로 띄울 것이기 때문에 div 대신 ul 태그 -->
+  <ul class="col-lg-4 list-group">
+    <!-- 태그 안의 내용이 길 경우에는 enter로 줄바꿈을 함으로서 깔끔하게 정리해준다. -->
+    <video-list-item 
+    v-for="video in videos" 
+    :key="video.etag" 
+    :video="video"
+    @videoSelect="onVideoSelect">
+    </video-list-item>
+  </ul>
+</template>
+
+<script>
+  import VideoListItem from './VideoListItem'
+
+  export default {
+    name: 'VideoList',
+    components: {
+      VideoListItem,
+    },
+  methods: {
+    onVideoSelect(video) {
+      // 받을 인자가 있기 때문에 this.video가 아닌 video
+      this.$emit('videoSelect', video)
+    }
+  },
+  props: {
+    videos: {
+      type: Array,
+      required: true,
+      },
+    },
+  }
+</script>
+
+<style>
+</style>
+```
+
+
+
+###### SearchBar
+
+```vue
+<template>
+  <div>
+    <!-- input => change 로 바꾸면 하나하나 쿼리값이 날라가지 않고 enter 를 쳐야 쿼리 값이 나간다. -->
+    <input @change="onInput" type="text">
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'SearchBar',
+    methods: {
+      onInput(e) {
+        this.$emit('inputChange', e.target.value)
+      }
+    }
+  }
+</script>
+
+
+<style scoped>
+  /* scoped => 이 vue에만 bootstrap css 적용 */
+  input {
+    width: 75%;
+  }
+
+  div {
+    text-align: center;
+    margin: 20px;
+  }
+</style>
+```
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app">
+    <!-- inputChange 이벤트가 일어나면 onInputChange 라는 method 가 실행 됨 -->
+    <search-bar @inputChange="onInputChange"></search-bar>
+
+    <!-- col값을 주려는 태그들을 row div로 감싼다. -->
+    <div class="row">
+      <!-- 값을 넘겨받은 selectedVideo를 바인드 -->
+      <video-detail :video="selectedVideo"></video-detail>
+
+      <!--오른쪽에서 왼쪽으로 할당, 왼쪽의 videos는 다르게 써도 상관 없지만 오른쪽의 "videos"는 이미 우리가 지정한 name이기 때문에 이름 그대로 써야 한다. -->
+      <video-list @videoSelect="onVideoSelect" :videos="videos"></video-list>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import SearchBar from './components/SearchBar'
+import VideoList from './components/VideoList'
+import VideoDetail from './components/VideoDetail'
+const API_KEY = process.env.VUE_APP_YOUTUBE_API_KEY
+const API_URL = 'https://www.googleapis.com/youtube/v3/search'
+
+export default {
+  name: 'App', // 최상단 컴포넌트기 때문에 이름이 없어도 되지만 명시적으로 작성한다.
+  components: {
+    SearchBar,
+    VideoList,
+    VideoDetail,
+  },
+  data() {
+    return { // return 값을 할 때에는 모든 객체가 return되기 때문에 객체를 한번 더 감싸서 구분을 주어야 한다. (component 의 data만)
+      videos: [],
+      selectedVideo: null,
+    }
+  },
+  methods: {
+    onVideoSelect(video) {
+      // 최종적으로 video를 받은 다음에 selectedVideo로 넘긴다.
+      this.selectedVideo = video
+    },
+    onInputChange(inputValue) {
+      axios.get(API_URL, {
+        params: {
+          key: API_KEY,
+          type: 'video',
+          part: 'snippet',
+          q: inputValue,
+        }
+      })
+        .then(response => {
+          this.videos = response.data.items
+        })
+        .catch(error => {
+          console.log(error)
+        }) // 함수 vs 함수기 때문에 arrow function 사용
+    }
+  }
+}
+</script>
+
+<style>
+</style>
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

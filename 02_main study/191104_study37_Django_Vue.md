@@ -3908,37 +3908,691 @@ export default {
 
 
 
+## :purple_heart: JWT
+
+- 정보를 안전하게 JSON 객체로 전송하기 위한 간결하고 독립적인 방법
+- 세션 / 쿠키와 함께 모바일과 웹의 인증을 책임지는 대표 기술 중 하나. 세션 / 쿠키의 정보 전달 방식과 유사하게 사용자는 Access Token (JWT token) 을 HTTP header에 실어서 서버로 요청을 보냄
+- 세션 / 쿠키 방식과 가장 큰 차이점은 세션 / 쿠키는 세션 저장소에 유저의 정보를 넣지만, JWT 는 토큰안에 유저의 정보를 넣는다.
+- Client의 입장에서는 HTTP header에 세션 ID / 토큰을 실어서 보낸다는 점은 동일하지만, server 입장에서는 인증을 위해 암호화(JWT 방식) 를 하냐 혹은 별도의 저장소(세션 / 쿠키 방식)를 이용하느냐의 차이 
+- HS256이 보통 기본값
+
+
+
+#### 사용 상황
+
+1. ##### 회원 인증
+
+   - 서버가 유저 정보에 기반한 토큰(JWT)을 발급해 유저에게 전달하고 유저는 서버에 요청을 보낼때마다 JWT를 포함하여 전달
+   - 서버는 세션을 유지할 필요 없이 유저의 요청정보 안에 있는 JWT만 확인하면 되다. (서버 자원 아낄 수 있음)
+
+2. ##### 정보 교환
+
+   - 정보가 서명이 되어 있기 때문에 정보를 보낸 사람의 정보 혹은 정보가 조작여부 확인 등이 가능
+
+
+
+#### 요약
+
+- 두 개체에서 JSON 객체를 사용하여 가볍고 자가 수용적인(self-contained, 필요한 모든 정보를 자체적으로 지님) 방식으로 정보를 안정성 있게 전달
+- 세션 상태를 저장하는 것이 아니라 필요한 정보를 JWT에 저장해서 사용자가 가지고 있게 하고, 해당 JWT를 증명서처럼 사용하는 방식
+
+> ##### 장점
+>
+> 1. 세션/쿠키 처럼 별도의 저장소 관리가 필요 없고 발급한 이후에 검증만 하면 된다.
+> 2. 토큰을 기반으로 한 다른 인증시스템에 접근이 용이하기 때문에 확장성이 뛰어나다.
+> 3. 모바일 환경에 적합 (쿠키와 같은 데이터로 인증할 필요가 없기 때문, 모바일 측은 쿠키를 관리하기 어려운 환경)
+> 4. Python, JS, Ruby, Go 등 주류 프로그래밍 언어에서 대부분 지원된다. (웹 표준을 지키고 있기 때문)
+>
+> 
+>
+> ##### 단점
+>
+> 1. 이미 발급 된 JWT는 유효기간이 완료될 때까지 계속 사용하기 때문에 악용(노출)될 가능성이 있음 (한번 발급된 토큰은 값을 수정하거나 폐기할 수 없다.) 그래서 이 문제는 Access Token 의 유효기간(expire time)을 딻게 하고 Refresh Token 등을 이요해서 중간 중간 새로운 토큰을 재발행 해준다.
+> 2. 세션/쿠키 방식에 비해 claim 데이터(payload)가 많아진다면 JWT 토큰의 길이가 길어지기 때문에 인증 요청이 많아 질 수록 네트워크의 대역폭이 낭비될 수 있다. (길이 자체가 길어진다면 요청량이 많아짐, 서버쪽에서 들고있는게 아닌 API 호출 시 매 호출마다 헤더에 붙여서 전달하기 때문)
+
+
+
+> xxxx(header).yyyy(Payload).zzzz(signature)
+>
+> - **header** : 토큰과 타입과 사용 알고리즘 정보가 들어감
+>
+> - **Payload** : 토큰에 담길 정보가 들어있는 곳 (claim - key:value)
+>
+> - **signature** : 헤더와 페이로드의 값에 비밀키로 해싱(hashing)
+
+
+
+#### 정보(payload)
+
+1. ##### registerd claim (등록된 클레임)
+
+   - 토큰에 대한 정보들을 담기 위해 이름이 이미 정해진 클레임들. 클레임의 사용은 모두 선택적이다.
+
+2. ##### public claim
+
+   - 공개 클레임은 충돌이 되지 않는 이름을 가지고 있어야 한다. (이름이 겹치면 안된다. 기존의 키값들도 동일) 보통 충돌을 방지하기 위해 key 값을 URI 형태로 만든다.
+
+     > 'apple' **(X)**
+     >
+     > 'https://test.co.kr/jwt_token':true **(O)**
+
+3. ##### private claim
+
+   - 등록된 클레임도, 공개 클레임도 아님. 클라이언트와 서버간에 협의하에 사용되는 클레임들
+   - key 값이 중복되어 충돌이 될 수 있으니 유의해서 사용.
+     충돌을 완전히 막을 수 있다기 보다는 유의하여 신중히 사용할 것
+   - ex) `{ "username": "admin" }`
+
+
+
+#### 서명 (signature)
+
+- HEADER 의 인코딩 값과, PAYLOAD의 인코딩 값을 합친 후 주어진 비밀키로 해쉬를 생성한 값
+- [공식 site](https://jwt.io/) **=>** [Debugger](https://jwt.io/#debugger-io) 되는 과정 **=>** [Libraries](https://jwt.io/#libraries-io) 사용하기위해 설치해야하는 라이브러리
+  - 라이브러리를 사용하면 알아서 JWT를 생성해주기 때문에 직접 알고리즘을 적용할 필요는 없다. 
+
+
+
+****
+
+
+
+1. [Download Windows x86-64 executable installer](https://www.python.org/ftp/python/3.7.3/python-3.7.3-amd64.exe)(Add into Python Path 체크) - **3.7.3**
+   bash에서 `python -V` 로 버전 체크, 설치한 버전이 아니라면 환경변수에 들어가 path에서 확인
+
+2. [vue cli install](https://cli.vuejs.org/guide/prototyping.html#instant-prototyping)
+
+3. `vue create todo-front` (bash에서 todo-front라는 프로젝트 create) - defalt
+
+4. ```bash
+   $ mkdir todo-back
+   $ cd todo-back
+   $ python -m venv venv
+   $ source venv/Script/activate
+   $ pip list
+   $ pip install django
+   $ django-admin startproject todoback .
+   $ python manage.py startapp todos
+   $ cd ..
+   $ cd todo-front
+   $ vue ls
+   $ vue ui
+   ```
+
+   - **pip list** :  환경 변수가 제대로 source 되었는지 확인
+
+   - 참고로 python 3.5 버전이면 제대로 환경변수가 설치되지 않는다.
+
+   - 환경변수 수정사항이 있다면 vscode를 껐다 실행하자
+
+   - **ls** : 현재 폴더의 파일 목록을 불러온다. 현재 폴더를 확인 할때 사용.
+
+   - 추가된 app을 setting에 추가 
+
+     ```python
+     INSTALLED_APPS = [
+         'todos',
+         ...
+     ```
+
+5. vue ui 를 실행하면 페이지가 하나 뜬다. 거기서 가져오기를 통해 `todo-front` 폴더를 가져온다. 
+
+6. install plugin(플러그인 추가) 에서 router를 검색하여 최상단 공식 router( `vue/cli-plugin-router` )를 다운로드 (비활성화 되어있는 체크를 활성화)
+
+   > node_modules / vue-router 폴더가 생성 되어 있음
+   >
+   > src / views 와 router 가 생성되었는지 확인
+   >
+   > 하단의 자식들은 component, router로 매핑되는 파일들은 src/views에 작성
+
+   
+
+   ###### 파일 구성
+
+   > :file_folder: todo-back *(django)*
+   > ​ㄴtodoback
+   >    -`settings.py`
+   >    ...
+   >
+   > ㄴtodos
+   > ㄴvenv
+   >
+   > -`db.spqlite3`
+   > -`manage.py`
+   >
+   > :file_folder: todo-front*​ (vue)*
+   > ㄴnode-modules
+   > ㄴpublic
+   > ㄴsrc
+   >
+   > -`.gitignore`
+   > -`babel.config.js`
+   > -`package-lock.json`
+   > -`package.json`
+   > -`README.md`
+
+   
+
+###### todo-front/src/views/Ligin.vue
+
+- `vbase` 단축키를 사용하면 vue 페이지 작성이 빠르다.
+
+```vue
+<template>
+  <div>
+    <h1>로그인 페이지 입니다.</h1>
+  </div>
+</template>
+
+<script>
+  export default {
+    
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+###### rodo-front/src/router/index.js
+
+```js
+import Vue from 'vue'
+import VueRouter from 'vue-router'
+import Home from '../views/Home.vue'
+import Login from '../views/Login.vue'
+
+Vue.use(VueRouter)
+
+const routes = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: Login
+  }
+]
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+export default router
+
+```
+
+
+
+###### todo-list/src/App.vue
+
+```vue
+<template>
+  <div id="app">
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/login">Login</router-link>
+      <!-- router 속성 안의 to로 인해 연결 -->
+    </div>
+    <div class="container col-6">
+      <router-view/>
+    </div>
+  </div>
+</template>
+...
+```
+
+
+
+###### todo-front/public/index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"integrity="sha384ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <title>todo-front</title>
+</head>
+
+<body>
+  ...
+```
 
 
 
 
 
+###### todo-front/src/component/LoginForm.vue
+
+- **CDN only** : `<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">`
+
+- [bootstrap forms](https://getbootstrap.com/docs/4.3/components/forms/)
+
+```vue
+<template>
+  <div class="login-div">
+    <div class="form-group">
+      <label for="id">ID</label>
+      <input type="text" class="form-control" id="id" placeholder="아이디를 입력해주세요">
+    </div>
+    <div class="form-group">
+      <label for="password">PASSWORD</label>
+      <input type="text" class="form-control" id="password" placeholder="비밀번호를 입력해주세요">
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    
+  }
+</script>
+
+<style>
+
+</style>
+```
 
 
 
 
 
+##### `router-link`
+
+- router 지원 앱에서 사용자 네비게이션을 가능하게 하는 컴포넌트
+- 목표 위치는 `to` prop 으로 지정된다.
+- 라우팅은 URI 에 따라 해당하는 정적 파일을 내려주는 방식인데 이를 브라우저에서 구현하는 것이 SPA 개발의 핵심
+- `router-link` 는 `a` 태그보다 선호되는데 이유는 HTML5 히스토리 모드에서 클릭 이벤트 자체를 차단하여 브라우저가 페이지를 다시 로드하지 않도록 한다.
+
+
+
+##### `router-view`
+
+- 라우팅이 경로에 맞는 컴포넌트를 제공하는데 해당 경로에 맞는 컴포넌트를 렌더링 해주는 부분
+
+
+
+###### todo-front/src/views/Home.vue
+
+- Home.vue가 Hello 뷰를 가지고있는 것을 지워줌
+
+```vue
+<template>
+  <div>
+    
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+
+export default {
+  
+}
+</script>
+
+```
+
+
+
+###### Login.vue
+
+```vue
+<template>
+  <div>
+    <!-- 아래를 케밥으로 쓰면 위도 케밥으로 써야하는데, 파스칼로 하면 둘다 사용 가능하다. 파스칼을 권장 -->
+    <LoginForm/>
+  </div>
+</template>
+
+<script>
+  // 3step => import => 등록 => 파스칼 or 케밥
+  // @ 는 `/src` 의 alias
+  // import LoginForm from '../components/LoginForm' // 상대경로 - 눈으로 추적해야하기 때문에 비효율 적
+  import LoginForm from '@/components/LoginForm' // 절대경로 /src => @
+  export default {
+    name: 'login',
+    components: {
+      LoginForm,
+    }
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+###### LoginForm.vue
+
+```vue
+<template>
+  <div class="login-div">
+    <div class="form-group">
+      <label for="id">ID</label>
+      <input 
+      type="text" 
+      class="form-control" 
+      id="id" 
+      placeholder="아이디를 입력해주세요"
+      v-model="credentials.username"
+      @keyup.enter="login"
+      >
+    </div>
+    <div class="form-group">
+      <label for="password">PASSWORD</label>
+      <input 
+      type="text" 
+      class="form-control" 
+      id="password" 
+      placeholder="비밀번호를 입력해주세요"
+      v-model="credentials.password"
+      @keyup.enter="login"
+      >
+    </div>
+    <button class="btn btn-primary" @click="login">로그인</button>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'LoginForm',
+    data() {
+      return {
+        // 객체로 해야 네임스페이스, 즉 충돌이 되지않고 공간이 나눠진다.
+        credentials: {},
+        loading: false,
+      }
+    },
+    methods: {
+      login() {
+        // console.log 자체가 배포단계때에는 사용하면 오류가 난다. 사용하면 안되어서 막혀있음.
+        console.log('Login button Clicked!!')
+      }
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- ```json
+  "rules": {
+        "no-console": "off"
+      },
+  ```
+
+  - package.json 에서 `rules` 에서 ` "no-console": "off"` 추가해야 console.log 오류가 나지 않는다.
+
+- 여태까지는 false일때, 이젠 true에서 실행되는 것을 해줄 것 : `v-if` `v-else`
+  [spinner](https://getbootstrap.com/docs/4.3/components/spinners/#border-spinner) : `class="spinner-border"`
+
+  ```vue
+  <template>
+    <div class="login-div">
+      <div v-if="loading" class="spinner-border">
+        <span class="sr-only">Loading...</span>
+        <!-- screen reader only 시각 장애인에게 로딩중인 것을 알려주는 것, 우리들 눈에는 none screen으로 보임 -->
+      </div>
+  
+      <div v-else class="login-form">
+        <div class="form-group">
+          <label for="id">ID</label>
+            ...
+            ...
+        <button class="btn btn-primary" @click="login">로그인</button>
+      </div>
+    </div>
+  </template>
+  ```
+
+
+
+###### LoginForm.vue
+
+```vue
+<template>
+  <div class="login-div">
+    <div v-if="loading" class="spinner-border">
+      <span class="sr-only">Loading...</span>
+      <!-- screen reader only 시각 장애인에게 로딩중인 것을 알려주는 것, 우리들 눈에는 none screen으로 보임 -->
+    </div>
+
+    <div v-else class="login-form">
+      <div v-if="errors.length" class="error-list alert alert-danger" role="alert">
+        <!-- errors 값이 true값 이라면 -->
+        <h4>다음의 오류를 해결해주세요.</h4>
+        <hr>
+        <!-- 키값이 필요하기 때문에 enumerate 형식으로 써주어야 함 -->
+        <div v-for="(error, idx) in errors" :key="idx">"{{ error }}"</div>
+      </div>
+
+      <div class="form-group">
+        <label for="id">ID</label>
+        <input 
+        type="text" 
+        class="form-control" 
+        id="id" 
+        placeholder="아이디를 입력해주세요"
+        v-model="credentials.username"
+        @keyup.enter="login"
+        >
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD</label>
+        <input 
+        type="password" 
+        class="form-control" 
+        id="password" 
+        placeholder="비밀번호를 입력해주세요"
+        v-model="credentials.password"
+        @keyup.enter="login"
+        >
+      </div>
+      <button class="btn btn-primary" @click="login">로그인</button>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'LoginForm',
+    data() {
+      return {
+        // 객체로 해야 네임스페이스, 즉 충돌이 되지않고 공간이 나눠진다.
+        credentials: {
+          username: '',
+          password: '',
+        },
+        loading: false,
+        errors: [],
+      }
+    },
+    methods: {
+      login() {
+        if (this.checkForm()) {
+          console.log('로그인 성공')
+        } else {
+          console.log('로그인 실패')
+        }
+      },
+      checkForm() {
+        // error 에 누적되어있는 값을 초기화
+        this.errors = []
+
+        // 검증 form
+        // id를 입력하지 않는 경우 (비어있는 경우)
+        if (!this.credentials.username) {
+          this.errors.push("아이디를 입력해주세요.")
+        }
+        // 길이가 너무 짧은 경우 (8자 이하)
+        if (this.credentials.password.length < 8) {
+          this.errors.push("비밀번호는 8자 이상 입력해주세요.")
+        }
+        // 정상인 것을 판단 => error 배열이 0 일 때 push된 error 가 하나도 없을 때
+        if (this.errors.length === 0) {
+          return true
+        }
+      }
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+#### :black_circle: axios
+
+```bash
+$ npm i axios
+```
+
+- axios로 login 요청을 보낼 것
+
+
+
+###### LoginForm.vue
+
+```vue
+<script>
+  import axios from 'axios'
+  export default {
+    name: 'LoginForm',
+    data() {
+      return {
+        credentials: {
+          username: '',
+          password: '',
+        },
+        loading: false,
+        errors: [],
+      }
+    },
+    methods: {
+      login() {
+        if (this.checkForm()) {
+          this.loading = true // 스피너가 돌게 될 것
+          // axios.get('django url')
+          axios.get('http://127.0.0.1:8000', this.credentials) // credentials 통째로 아이디와 패스워드를 넘김
+          .then(res => {
+            console.log(res)
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      } else {
+        console.log('로그인 검증 실패')
+        }
+      },
+      ...
+</script>
+```
+
+- `import axios from 'axios'`
+
+
+
+###### LoginForm.vue : 다듬기
+
+```vue
+<template>
+  <div class="login-div">
+    <div v-if="loading" class="spinner-border">
+      <span class="sr-only">Loading...</span>
+    </div>
+      
+    <!-- div => form태그로 바꿔준 후 form태그에 이벤트 속성을 줄 것
+ => @submit="login" 하지만 로그인 실패시 페이지가 redirect 되어 오류창이 떴다가 사라진다. 주소 가장뒤에 ?이 붙은 것을 확인 가능 -->
+    <form v-else class="login-form" @submit.prevent="login">
+      <!-- prevent => 기본적인 활동으로 redirect하게 하지 않은 것 -->
+      <div v-if="errors.length" class="error-list alert alert-danger" role="alert">
+        <h4>다음의 오류를 해결해주세요.</h4>
+        <hr>
+        <div v-for="(error, idx) in errors" :key="idx">"{{ error }}"</div>
+      </div>
+      <div class="form-group">
+        <label for="id">ID</label>
+        <input 
+        type="text" 
+        class="form-control" 
+        id="id" 
+        placeholder="아이디를 입력해주세요"
+        v-model="credentials.username"
+        >
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD</label>
+        <input 
+        type="password" 
+        class="form-control" 
+        id="password" 
+        placeholder="비밀번호를 입력해주세요"
+        v-model="credentials.password"
+        >
+      </div>
+      <!-- type을submit으로 -->
+      <button type="submit" class="btn btn-primary">로그인</button>
+    </form>
+  </div>
+</template>
+```
 
 
 
 
 
+### :purple_heart: CORS 
+
+- Cross-Origin Resource Sharing
+
+[HTTP 접근 제어 (CORS)](https://developer.mozilla.org/ko/docs/Web/HTTP/Access_control_CORS)
+
+- 연결시키려는 도메인의 주소가 각기 다르기 때문에, sharing을 도와주는 기술
+- django와 vue는 도메인은 같지만 포트가 다르기때문에 충돌이 일어난다. **=>** django에서 denine 요청을 보낸다.
 
 
 
+#### 정의
+
+- 한 도메인에서 로드되어 다른 도메인에 있는 리소스와 상호작용 하는 것
+- 즉, 도메인이나 포트가 다른 서버의 자원을 요청하는 메커니즘
 
 
 
+#### 문제 상황
+
+1. 요청을 할 때 cross-origin HTTP 에 의해 요청을 한다.
+2. 하지만 CORS 와 같은 상황이 발생하면 외부 서버에 의한 요청 데이터를 브라우저에서 차단하기 때문에 (보안 목적) 정상적으로 데이터를 받을 수 없다.
+3. 예를 들어, http://localhost:8080/ 에서 vue를 실행하고,  http://localhost:8000/ 에서 django를 실행할 경우 포트가 달라 다른 도메인으로 인지하고 브라우저가 요청을 차단한다. 
 
 
 
+#### 해결 방법
 
-
-
-
-
-
-
+1. 서버(django)와 클라이언트(vue)가 같은 도메인과 포트를 사용하도록 한다.
+2. 서버에서 cross-origin HTTP 요청을 허가한다. (우리가 해결할 방법)
+   - 실제 API 서버들은 이러한 CORS 제한과 관련된 처리를 모두 해두어야 한다.
 
 
 

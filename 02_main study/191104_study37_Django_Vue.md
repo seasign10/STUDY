@@ -4136,14 +4136,14 @@ export default router
 
 ```vue
 <template>
-  <div id="app">
+  <div id="app" class="container">
     <div id="nav">
       <router-link to="/">Home</router-link> |
       <router-link to="/login">Login</router-link>
       <!-- router 속성 안의 to로 인해 연결 -->
     </div>
-    <div class="container col-6">
-      <router-view/>
+    <div class="row justify-content-center">
+      <router-view class="col-6"/>
     </div>
   </div>
 </template>
@@ -4593,6 +4593,1486 @@ $ npm i axios
 1. 서버(django)와 클라이언트(vue)가 같은 도메인과 포트를 사용하도록 한다.
 2. 서버에서 cross-origin HTTP 요청을 허가한다. (우리가 해결할 방법)
    - 실제 API 서버들은 이러한 CORS 제한과 관련된 처리를 모두 해두어야 한다.
+
+
+
+
+
+- 최상단 폴더인 것을 확인
+  **ls** : todo-front / todo-back
+
+> ##### 설치 순서
+>
+> DRF
+>
+> DRF-JWT
+>
+> CORS
+
+[django-rest-framework-jwt](https://jpadilla.github.io/django-rest-framework-jwt/)
+
+[django-cors-headers](https://github.com/adamchainz/django-cors-headers#setup)
+
+```bash
+$ pip install djangorestframework
+$ pip install djangorestframework-jwt
+$ pip install django-cors-headers
+```
+
+```python
+import os
+import datetime
+
+INSTALLED_APPS = [
+    'todos',
+    'rest_framework',
+    'corsheaders',
+    ...
+]
+
+# DRF jwt 설정 cors보다 먼저 설치 되었으니 미들웨어보다 위쪽에
+REST_FRAMEWORK = {
+    # 로그인 여부를 확인하는 클래스
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    # 인증 여부를 확인하는 클래스
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+
+JWT_AUTH = {
+    # JWT를 encrypt(암호화) 함. 절대 외부 노출 금지
+    'JWT_SECRET_KEY': SECRET_KEY,
+    # 토큰 해싱 알고리즘 (defalt: HS256)
+    'JWT_ALGORITHM': 'HS256',
+    # 7일간 유효한 토큰
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    # 토큰 갱신 허용 여부
+    'JWT_ALLOW_REFRESH': True, # 갱신 사용
+    # 유효기간 연장시 28일 마다 토큰 갱신
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28), # ~일마다 토큰갱신
+}
+
+MIDDLEWARE = [ 
+    ...
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    ...
+]
+
+# 원래대로라면 아래와 같이 허용할 도메인 리스트를 작성해야 하지만
+# 개발 테스트 단계이므로 모든 요청을 허용하기 위해 주석처리 한다.
+# CORS_ORIGIN_WHITELIST = [
+# ]
+
+# 모든 요청을 허용하도록 설정
+CORS_ORIGIN_ALLOW_ALL = True
+
+# 눈에는 보이진 않지만 기본 설정 값 : AUTH_USER_MODEL = 'auth.user'
+AUTH_USER_MODEL = 'todos.User'
+```
+
+- setting.py 에 등록
+
+- `'django.middleware.common.CommonMiddleware',` 중복되는 이 코드를 삭제 후 위의 코드 두 줄 추가
+- [CORS_ORIGIN_ALLOW_ALL](https://github.com/adamchainz/django-cors-headers#cors_origin_allow_all)
+
+
+
+###### todo-back/todos/models.py
+
+```python
+from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+
+# Create your models here.
+class User(AbstractUser):
+    pass
+
+class Todo(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    title = models.CharField(max_length=50)
+    completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.title
+```
+
+
+
+- todo-back 에서
+
+```bash
+$ python manage.py makemigrations
+$ python manage.py migrate
+$ python manage.py createsuperuser
+$ python manage.py runserver
+```
+
+- migrate 후 서버 접속, http://127.0.0.1:8000/api-token-auth/ 로 들어가면 GET방식으로 들어가서 키를 줄수 없다고  뜬다.
+
+![image](https://user-images.githubusercontent.com/52684457/69106512-f7235b00-0ab1-11ea-97f8-154ff5a0c641.png)
+
+- createsuperuser 로 만든 관리자로 POST 접속을 해주면 해당token이 발급 된다.
+
+- **[JWT](https://jwt.io/#libraries-io)** 해당 사이트에 접속 후 Encoded에 토큰을 입력하면 Decoded에 코드 해석이 나온다. (`secret base64 encoded`를 체크해주어야 해당 사이트의 번역코드로 나온다. )
+
+
+
+- **터미널을 두개를 켜서** 하나는 django, 하나는 vue 서버를 열어준다. (django 서버는 이미 켜져있을 경우 켜진 상태로 그대로 유지)
+
+```bash
+$ python manage.py runserver
+```
+
+```bash
+$ npm run serve
+```
+
+
+
+###### LoginForm.vue
+
+```vue
+
+<script>
+  import axios from 'axios'
+  export default {
+    name: 'LoginForm',
+    data() {
+      return {
+        ...
+      }
+    },
+    methods: {
+      login() {
+        if (this.checkForm()) {
+          // 1. django jwt 를 생성하는 주소로 요청을 보냄
+          // 이때 post 요청으로 보내야 하며 사용자가 입력한 로그인 정보(credentials)를 같이 넘겨야 함
+          axios.post('http://127.0.0.1:8000/api-token-auth/', this.credentials) // credentials 통째로 아이디와 패스워드를 넘김
+          .then(res => {
+            // 2. 로그인 이후에 loading 의 상태를 다시 false 로 변경 
+            // 그래야 spinner 가 계속 돌지 않고 로그인 form을 받아 볼 수 있음
+            this.loading = false
+            console.log(res)
+          })
+          .catch(err => {
+            // 2. 로그인 실패 시 loading 의 상태를 다시 false 로 변경 
+            this.loading = false
+            console.log(err)
+          })
+      } else {
+        console.log('로그인 검증 실패')
+        }
+      },
+      checkForm() {
+        // error 에 누적되어있는 값을 초기화
+        this.errors = []
+
+        // 검증 form
+        // id를 입력하지 않는 경우 (비어있는 경우)
+        if (!this.credentials.username) {
+          this.errors.push("아이디를 입력해주세요.")
+        }
+        // 길이가 너무 짧은 경우 (3자 이하)
+        if (this.credentials.password.length < 3) {
+          this.errors.push("비밀번호는 3자 이상 입력해주세요.")
+        }
+        // 정상인 것을 판단 => error 배열이 0 일 때 push된 error 가 하나도 없을 때
+        if (this.errors.length === 0) {
+          return true
+        }
+      }
+    },
+  }
+</script>
+```
+
+- admin의 비밀번호가 8자 이하라서 길이 오류코드를 3자 이하로 조정 해주었다. (그렇지 않으면 오류 발생) 로그인 실패 시, 주석처리까지 해주는게 좋을 것 같음.
+
+
+
+- 인증 된 유저로 로그인을 하면 콘솔에 토큰 확인이 가능
+- res **=>** data **=>** token
+
+![image](https://user-images.githubusercontent.com/52684457/69107549-18d21180-0ab5-11ea-8d3a-1ed4ccef359e.png)
+
+
+
+- vue 서버를 꺼준 후,
+
+```bash
+$ npm i vue-session
+```
+
+- [vue-session](https://www.npmjs.com/package/vue-session) 의 To install the plugin, do the following: 을 따른다.
+
+
+
+###### todo-front/src/views/main.js
+
+```js
+import Vue from 'vue'
+import App from './App.vue'
+import router from './router'
+import VueSession from 'vue-session'
+
+Vue.config.productionTip = false
+Vue.use(VueSession)
+
+new Vue({
+  router,
+  render: h => h(App)
+}).$mount('#app')
+```
+
+- `import VueSession from 'vue-session'`
+- `Vue.use(VueSession)`
+
+
+
+
+
+![image](https://user-images.githubusercontent.com/52684457/69108510-35bc1400-0ab8-11ea-966f-778b0542cfbb.png)
+
+> #### [Reference](https://www.npmjs.com/package/vue-session#reference)
+>
+> ##### this.$session.start()
+>
+> - session-id 초기화. 만약 세션이 없이 저장하려고 하면 vue-session 플러그인이 자동으로 새로운 세션을 시작
+>
+> ##### this.$session.set(key,value)
+>
+> - session 에 해당 key에 맞는 값을 저장
+>
+> ##### this.$session.has(key)
+>
+> - key(JWT) 가 존재하는지 여부를 확인
+>
+> ##### this.$session.destroy()
+>
+> - 세션을 삭제
+
+
+
+0. ##### django
+
+- 회원가입
+
+1. ##### Veu **=>** django
+
+- 로그인 정보(credentials) 를 django 서버로 보냄
+
+2. ##### Django
+
+- Vue 에서 받은 유저정보에 해당하는 고유한 Web Token 발급
+
+3. ##### Django => Vue
+
+- 해당 유저에 대한 토큰을 Vue로 보냄
+
+4. ##### Vue 
+
+- Django 에서 받은 토큰을 vue-session 을 통해 저장(이 시점부터 vue 에서는 로그인 성공 상태)
+
+5. ##### Vue => Django
+
+- vue-session 에 저장된 토큰을 가지고 django에 로그인 요청
+
+6. ##### Django
+
+- 최초로 보낸 토큰과 일치하는지 여부를 확인(세션*(django)* 에 저장된 토큰 == 요청자의 토큰)
+- 결국 마지막에 로그인 처리해주는 것은 django
+
+
+
+```vue
+<script>
+  import axios from 'axios'
+  import router from '../router'
+    ...
+  export default {
+    ...
+    methods: {
+      login() {
+        if (this.checkForm()) {
+          this.loading = true
+          // 1. django jwt 를 생성하는 주소로 요청을 보냄
+          // 이때 post 요청으로 보내야 하며 사용자가 입력한 로그인 정보(credentials)를 같이 넘겨야 함
+          axios.post('http://127.0.0.1:8000/api-token-auth/', this.credentials) // credentials 통째로 아이디와 패스워드를 넘김
+          .then(res => {
+            this.$session.start()
+            this.$session.set('jwt', res.data.token)
+            router.push('/') // 로그인 후 메인 페이지로 이동하게 되는 것 
+            // 2. 로그인 이후에 loading 의 상태를 다시 false 로 변경 
+            // 그래야 spinner 가 계속 돌지 않고 로그인 form을 받아 볼 수 있음
+            // this.loading = false // 실패시에만 false 하면 되기 때문에 필요 없어 짐
+          })
+          .catch(err => {
+    }
+```
+
+- router 를 import
+- `.start()` 를 통해 `session-id` : `sess` + `Date.now()` 가 만들어짐
+- `.set()` 을 통해 `jwt: jwt값` 이 만들어짐
+
+![image](https://user-images.githubusercontent.com/52684457/69109369-e4f9ea80-0aba-11ea-93f3-299f6e30d3b8.png)
+
+- 성공적인 로그인 시도 시, 콘솔에 로그인 검증 실패가 뜨지 않고 Home으로 돌아간다. 
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import router from '../router'
+
+export default {
+  name: 'home',
+  component: {
+
+  },
+  methods: {
+    checkLoggedIn() {
+      this.$session.start()
+      if (!this.$session.has('jwt')) { // 인증된 사용자가 아니라면
+        router.push('/login') // 로그인 폼으로 보낼 것
+      }
+    }
+  },
+  // DOM 에 Vue instance 가 mount 될 때마다 checkLoggedIn 이 실행되어 로그인 여부를 체크
+  mounted () {
+    this.checkLoggedIn()
+  },
+}
+</script>
+
+```
+
+- 서버를 다시 껐다 켜보자.
+
+![image](https://user-images.githubusercontent.com/52684457/69110479-41aad480-0abe-11ea-9779-1e9960f61a32.png)
+
+- 로그인 시 자동으로 Home으로 가는 것을 확인 가능
+
+
+
+##### Vue의 라이프 사이클 
+
+> [라이프사이클 다이어그램](https://kr.vuejs.org/v2/guide/instance.html#%EB%9D%BC%EC%9D%B4%ED%94%84%EC%82%AC%EC%9D%B4%ED%81%B4-%EB%8B%A4%EC%9D%B4%EC%96%B4%EA%B7%B8%EB%9E%A8)
+>
+> 1. Vue instance 생성 (create)
+> 2. DOM 에 부착(mounted)
+> 3. Update
+> 4. Destroy (삭제)
+
+
+
+이어서
+
+### :dog: Djaogn : CRUD
+
+
+
+###### todo-back/todoback(project)/urls.py
+
+```python
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework_jwt.views import obtain_jwt_token
+
+urlpatterns = [
+    path('api/v1/', include('todos.urls')),
+    path('api-token-auth/', obtain_jwt_token),
+    path('admin/', admin.site.urls),
+]
+```
+
+- 저장 하기 전에
+
+
+
+###### todo-back/todos(app)/urls.pt
+
+- app의 urls.py가 없기 때문에 작성
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('todos/', views.todo_create),
+]
+```
+
+
+
+###### todo-back/todos(app)/serializers.py
+
+```python
+from rest_framework import serializers
+from .models import Todo
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ('id', 'user', 'title', 'completed',)
+```
+
+
+
+###### todo-back/todos(app)/views.py
+
+```python
+from rest_framework.response import Response
+from django.shortcuts import render
+from rest_framework.decorators import api_view, permissions_classes, authentication_classes
+# from rest_framework.permission import IsAuthenticated
+# from rest_framework.authentication import JSONWebTokenAuthentication
+from .serializers import TodoSerializer
+
+# Create your views here.
+
+
+@api_view(['POST'])
+# 아래의 두가지는 생략이 가능, settings.py에서 DEFAULT 로 REST_FRAMEWORK 설정을 했기 때문
+# 1. 인증 받은 사용자만 허가(로그인 여부만 체크)
+# @permission_classes((IsAuthenticated, ))
+# 2. jwt 인증
+# @authentication_classes((JSONWebTokenAuthentication))
+def todo_create(request):
+    serializer = TodoSerializer(data=request.POST)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(status=400)
+```
+
+- [Function Based Views](https://www.django-rest-framework.org/api-guide/views/#function-based-views) : `from rest_framework.decorators import api_view`
+
+- http://127.0.0.1:8000/api/v1/todos/ 접속하게 되면
+
+  ![image](https://user-images.githubusercontent.com/52684457/69111752-d6fb9800-0ac1-11ea-86dd-fab244b8101c.png)
+
+  - 터미널에서 401 error가 뜨는 것을 확인 가능하다.
+
+  - [HTTP 상태 코드](https://developer.mozilla.org/ko/docs/Web/HTTP/Status) / [`401 Unauthorized`](https://developer.mozilla.org/ko/docs/Web/HTTP/Status/401)
+
+
+
+#### :orange: Postman 으로 확인
+
+##### :large_orange_diamond: token
+
+![image](https://user-images.githubusercontent.com/52684457/69112403-7bcaa500-0ac3-11ea-9afc-38d37d7bec2d.png)
+
+- 토큰 값 확인 가능
+
+![image](https://user-images.githubusercontent.com/52684457/69112497-b9c7c900-0ac3-11ea-804b-c9c5bf37cdae.png)
+
+- 이 상태 그대로 넣으려면 401 error가 뜬다.
+
+
+
+##### :large_orange_diamond: CREATE​
+
+![image](https://user-images.githubusercontent.com/52684457/69112670-26db5e80-0ac4-11ea-92a5-89deacb46681.png)
+
+- headers에서 토큰값을 Authorization 로 넣어주면 제대로 글이 작성하는 것을 확인 가능
+
+
+
+###### views.py
+
+```python
+from .models import Todo
+
+@api_view(['PUT', 'DELETE'])
+def todo_update_delete(request, id): # django안에서만 사용하는 것이 아닌, 범용적이기 때문에 api사용시에는 id 사용
+    todo = get_object_or_404(Todo, pk=id) # djago에서 가리키는 id => pk, 기존의 todo
+    if request.method == 'PUT':
+        serializer = TodoSerializer(todo, data=request.data) # 현재 데이터 정보, data => 새로 작성할 todo
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    elif request.method == 'DELETE':
+        todo.delete()
+        # 204 : 해당하는 컨텐츠가 없는 경우 (삭제를 했기 때문에 해당 데이터가 이제 존재하지 않음을 알려줌)
+        return Response(status=204)
+```
+
+
+
+###### urls.py(app)
+
+```python
+urlpatterns = [
+    ...
+    path('todos/<int:id>/', views.todo_update_delete),
+]
+```
+
+
+
+##### :large_orange_diamond: UPDATE & DELETE​
+
+![image](https://user-images.githubusercontent.com/52684457/69117431-fb13a500-0ad2-11ea-8dd9-3569866ba659.png)
+
+- Headers에서 토큰값을 담고 PUT으로 요청을 보내면 수정 사항을 확인 가능
+
+- DELETE 요청을 보낼때는 token 값만 입력해주면 삭제가 된다. (삭제되었기 때문에 아무것도 뜨지 않는다.)
+
+
+
+###### serializers.py
+
+```python
+from rest_framework import serializers
+from django.contrib.auth import get_user_model # 추가
+from .models import Todo
+
+User = get_user_model() # 표현식을 위해 따로 담아서 사용(권장)
+
+class TodoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Todo
+        fields = ('id', 'user', 'title', 'completed',)
+
+class UserCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'password',)
+```
+
+
+
+[`from django.contrib.auth.models import AbstractUser`](https://github.com/django/django/blob/master/django/contrib/auth/models.py#L315) 이 기반
+
+- 외부 라이브러리(rest_framework)때문에 암호화가 제대로 되지 않는다. (django만 사용 할 때에는 자동 암호화가 된다.)
+
+
+
+###### views.py
+
+```python
+from rest_framework.response import Response
+from django.shortcuts import render, get_object_or_404
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny # AllowAny 전체 허용
+# from rest_framework.authentication import JSONWebTokenAuthentication
+from .serializers import TodoSerializer, UserCreationSerializer
+from .models import Todo
+
+User = get_user_model()
+...
+
+@api_view(['POST'])
+# 모두에게 접근 허용(로그인 여부 판단 안함)
+@permission_classes((AllowAny, ))
+def user_signup(request):
+    serializer = UserCreationSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        user = serializer.save()
+        user.set_password(request.data.get('password'))
+        user.save()
+        print(serializer.data)
+        return Response({'message': '회원가입이 성공적으로 완료되었습니다.'})
+```
+
+
+
+###### urls.py
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    ...
+    path('users/', views.user_signup),
+]
+```
+
+
+
+##### :large_orange_diamond: SIGN UP​
+
+![image](https://user-images.githubusercontent.com/52684457/69118124-91e16100-0ad5-11ea-9e20-1db1bb7104e6.png)
+
+- 회원가입이 되는 것을 확인가능
+
+  ```python
+  if serializer.is_valid(raise_exception=True):
+      user = serializer.save()
+      user.set_password(request.data.get('password'))
+      user.save()
+      print(serializer.data)
+      return Response({'message': '회원가입이 성공적으로 완료되었습니다.'})
+  ```
+
+  - 이러한 과정 없이
+
+  ```python
+  if serializer.is_valid(raise_exception=True):
+      serializer.save()
+      print(serializer.data)
+      return Response({'message': '회원가입이 성공적으로 완료되었습니다.'})
+  ```
+
+  - 바로 `.save()` 세이브하게 된다면, 
+
+   ![image](https://user-images.githubusercontent.com/52684457/69119204-2ef1c900-0ad9-11ea-84b6-af2ef7b5ed98.png)
+
+  - 패스워드가 암호화 되는 것을 확인 할 수 있다.
+  - 또한 토큰값이 받아지지 않는 것이 받아진다.
+
+
+
+
+
+###### serializers.py
+
+```python
+class UserSerializer(serializers.ModelSerializer):
+    todo_set = TodoSerializer(many=True) # 여러개의 값이 들어갈 수 있기 때문에
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'todo_set',)
+```
+
+
+
+###### views.py
+
+```python
+from rest_framework.response import Response
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, get_object_or_404
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny # AllowAny 전체 허용
+# from rest_framework.authentication import JSONWebTokenAuthentication
+from django.contrib.auth import get_user_model
+from .serializers import TodoSerializer, UserCreationSerializer, UserSerializer
+from .models import Todo
+
+User = get_user_model()
+
+...
+
+@api_view(['GET'])
+def user_detail(request, id):
+    user = get_object_or_404(User, pk=id)
+    if request.user != user:
+        # return Response(status=403) 
+        # 클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않음. 
+        # 401과 다르게 403은 클라이언트가 누구인지 알고 있다. 
+        # (인증은 맞지만 권한이 없는 유저)
+        return HttpResponseForbidden()
+    serializer = UserSerializer(user)
+    return Response(serializer.data)
+```
+
+
+
+###### urls.py
+
+```python
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('todos/', views.todo_create),
+    path('todos/<int:id>/', views.todo_update_delete),
+    path('users/', views.user_signup),
+    path('users/<int:id>/', views.user_detail),
+]
+```
+
+
+
+##### :large_orange_diamond: USER DETAIL​
+
+![image](https://user-images.githubusercontent.com/52684457/69119538-51d0ad00-0ada-11ea-821e-4061d2990b20.png)
+
+- 해당 id의 게시글 조회 
+
+- 만약 다른 id의 글을 조회하고 싶다면, 그 id의 토큰을 가져오면 된다.
+
+  (*이 문서 내의 Postman 가장 초반 부분를을 확인* )
+
+
+
+#### :page_with_curl: 최종본(Django)
+
+> #### PROJECT
+>
+> ###### urls.py
+>
+> ```python
+> from django.contrib import admin
+> from django.urls import path, include
+> from rest_framework_jwt.views import obtain_jwt_token
+> 
+> urlpatterns = [
+>     path('api/v1/', include('todos.urls')),
+>     path('api-token-auth/', obtain_jwt_token),
+>     path('admin/', admin.site.urls),
+> ]
+> ```
+>
+> 
+>
+> ##### settings.py
+>
+> ```python
+> import os
+> import datetime
+> 
+> # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+> BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+> 
+> 
+> # Quick-start development settings - unsuitable for production
+> # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
+> 
+> # SECURITY WARNING: keep the secret key used in production secret!
+> SECRET_KEY = 'sn&ies5wgp1)gcax1g(qag9bd1h9+cvtulff)+98b-&gaaxh_c'
+> 
+> # SECURITY WARNING: don't run with debug turned on in production!
+> DEBUG = True
+> 
+> ALLOWED_HOSTS = []
+> 
+> 
+> # Application definition
+> 
+> INSTALLED_APPS = [
+>     'todos',
+>     'rest_framework',
+>     'corsheaders',
+>     'django.contrib.admin',
+>     'django.contrib.auth',
+>     'django.contrib.contenttypes',
+>     'django.contrib.sessions',
+>     'django.contrib.messages',
+>     'django.contrib.staticfiles',
+> ]
+> 
+> # DRF jwt 설정 
+> REST_FRAMEWORK = {
+>     # 로그인 여부를 확인하는 클래스
+>     'DEFAULT_PERMISSION_CLASSES': (
+>         'rest_framework.permissions.IsAuthenticated',
+>     ),
+>     # 인증 여부를 확인하는 클래스
+>     'DEFAULT_AUTHENTICATION_CLASSES': (
+>         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+>         'rest_framework.authentication.SessionAuthentication',
+>         'rest_framework.authentication.BasicAuthentication',
+>     ),
+> }
+> 
+> JWT_AUTH = {
+>     # JWT를 encrypt(암호화) 함. 절대 외부 노출 금지
+>     'JWT_SECRET_KEY': SECRET_KEY,
+>     # 토큰 해싱 알고리즘 (default: HS256)
+>     'JWT_ALGORITHM': 'HS256',
+>     # 7일간 유효한 토큰
+>     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+>     # 토큰 갱신 허용 여부
+>     'JWT_ALLOW_REFRESH': True, # 갱신 사용
+>     # 유효기간 연장시 28일 마다 토큰 갱신
+>     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=28), # ~일마다 토큰갱신
+> }
+> 
+> MIDDLEWARE = [
+>     'corsheaders.middleware.CorsMiddleware',
+>     'django.middleware.security.SecurityMiddleware',
+>     'django.contrib.sessions.middleware.SessionMiddleware',
+>     'django.middleware.common.CommonMiddleware',
+>     'django.middleware.csrf.CsrfViewMiddleware',
+>     'django.contrib.auth.middleware.AuthenticationMiddleware',
+>     'django.contrib.messages.middleware.MessageMiddleware',
+>     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+> ]
+> 
+> # 원래대로라면 아래와 같이 허용할 도메인 리스트를 작성해야 하지만
+> # 개발 테스트 단계이므로 모든 요청을 허용하기 위해 주석처리 한다.
+> # CORS_ORIGIN_WHITELIST = [
+> # ]
+> 
+> # 모든 요청을 허용하도록 설정
+> CORS_ORIGIN_ALLOW_ALL = True
+> 
+> ROOT_URLCONF = 'todoback.urls'
+> 
+> TEMPLATES = [
+>     {
+>         'BACKEND': 'django.template.backends.django.DjangoTemplates',
+>         'DIRS': [],
+>         'APP_DIRS': True,
+>         'OPTIONS': {
+>             'context_processors': [
+>                 'django.template.context_processors.debug',
+>                 'django.template.context_processors.request',
+>                 'django.contrib.auth.context_processors.auth',
+>                 'django.contrib.messages.context_processors.messages',
+>             ],
+>         },
+>     },
+> ]
+> 
+> WSGI_APPLICATION = 'todoback.wsgi.application'
+> 
+> 
+> # Database
+> # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
+> 
+> DATABASES = {
+>     'default': {
+>         'ENGINE': 'django.db.backends.sqlite3',
+>         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+>     }
+> }
+> 
+> 
+> # Password validation
+> # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
+> 
+> AUTH_PASSWORD_VALIDATORS = [
+>     {
+>         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+>     },
+>     {
+>         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+>     },
+>     {
+>         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+>     },
+>     {
+>         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+>     },
+> ]
+> 
+> 
+> # Internationalization
+> # https://docs.djangoproject.com/en/2.2/topics/i18n/
+> 
+> LANGUAGE_CODE = 'ko-kr'
+> 
+> TIME_ZONE = 'Asia/Seoul'
+> 
+> USE_I18N = True
+> 
+> USE_L10N = True
+> 
+> USE_TZ = True
+> 
+> 
+> # Static files (CSS, JavaScript, Images)
+> # https://docs.djangoproject.com/en/2.2/howto/static-files/
+> 
+> STATIC_URL = '/static/'
+> 
+> 
+> # 눈에는 보이진 않지만 기본 설정 값 : AUTH_USER_MODEL = 'auth.user'
+> AUTH_USER_MODEL = 'todos.User'
+> ```
+>
+> 
+>
+> #### APP
+>
+> ##### models.py
+>
+> ```python
+> from django.db import models
+> from django.conf import settings
+> from django.contrib.auth.models import AbstractUser
+> 
+> # Create your models here.
+> class User(AbstractUser):
+>     pass
+> 
+> class Todo(models.Model):
+>     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+>     title = models.CharField(max_length=50)
+>     completed = models.BooleanField(default=False)
+> 
+>     def __str__(self):
+>         return self.title
+> ```
+>
+> 
+>
+> ###### serializers.py
+>
+> ```python
+> from rest_framework import serializers
+> from django.contrib.auth import get_user_model
+> from .models import Todo
+> 
+> User = get_user_model()
+> 
+> class TodoSerializer(serializers.ModelSerializer):
+>     class Meta:
+>         model = Todo
+>         fields = ('id', 'user', 'title', 'completed',)
+> 
+> class UserCreationSerializer(serializers.ModelSerializer):
+>     class Meta:
+>         model = User
+>         fields = ('id', 'username', 'password',)
+> 
+> class UserSerializer(serializers.ModelSerializer):
+>     todo_set = TodoSerializer(many=True) # 여러개의 값이 들어갈 수 있기 때문에
+>     class Meta:
+>         model = User
+>         fields = ('id', 'username', 'todo_set',)
+> ```
+>
+> 
+>
+> ##### urls.py
+>
+> ```python
+> from rest_framework import serializers
+> from django.contrib.auth import get_user_model
+> from .models import Todo
+> 
+> User = get_user_model()
+> 
+> class TodoSerializer(serializers.ModelSerializer):
+>     class Meta:
+>         model = Todo
+>         fields = ('id', 'user', 'title', 'completed',)
+> 
+> class UserCreationSerializer(serializers.ModelSerializer):
+>     class Meta:
+>         model = User
+>         fields = ('id', 'username', 'password',)
+> 
+> class UserSerializer(serializers.ModelSerializer):
+>     todo_set = TodoSerializer(many=True) # 여러개의 값이 들어갈 수 있기 때문에
+>     class Meta:
+>         model = User
+>         fields = ('id', 'username', 'todo_set',)
+> ```
+>
+> 
+>
+> ##### views.py
+>
+> ```python
+> from rest_framework.response import Response
+> from django.http import HttpResponseForbidden
+> from django.shortcuts import render, get_object_or_404
+> from rest_framework.decorators import api_view, permission_classes, authentication_classes
+> from rest_framework.permissions import IsAuthenticated, AllowAny # AllowAny 전체 허용
+> # from rest_framework.authentication import JSONWebTokenAuthentication
+> from django.contrib.auth import get_user_model
+> from .serializers import TodoSerializer, UserCreationSerializer, UserSerializer
+> from .models import Todo
+> 
+> User = get_user_model()
+> 
+> # Create your views here.
+> 
+> 
+> @api_view(['POST'])
+> # 아래의 두가지는 생략이 가능, settings.py에서 DEFAULT 로 REST_FRAMEWORK 설정을 했기 때문
+> # 1. 인증 받은 사용자만 허가(로그인 여부만 체크)
+> # @permission_classes((IsAuthenticated, ))
+> # 2. jwt 인증
+> # @authentication_classes((JSONWebTokenAuthentication))
+> def todo_create(request):
+>     serializer = TodoSerializer(data=request.POST)
+>     if serializer.is_valid():
+>         serializer.save()
+>         return Response(serializer.data)
+>     return Response(status=400) # bad request => 400
+> 
+> @api_view(['PUT', 'DELETE'])
+> def todo_update_delete(request, id): # django안에서만 사용하는 것이 아닌, 범용적이기 때문에 api사용시에는 id 사용
+>     todo = get_object_or_404(Todo, pk=id) # djago에서 가리키는 id => pk, 기존의 todo
+>     if request.method == 'PUT':
+>         serializer = TodoSerializer(todo, data=request.data) # 현재 데이터 정보, data => 새로 작성할 todo
+>         if serializer.is_valid():
+>             serializer.save()
+>             return Response(serializer.data)
+>         return Response(serializer.errors, status=400)
+>     elif request.method == 'DELETE':
+>         todo.delete()
+>         # 204 : 해당하는 컨텐츠가 없는 경우 (삭제를 했기 때문에 해당 데이터가 이제 존재하지 않음을 알려줌)
+>         return Response(status=204)
+> 
+> @api_view(['POST'])
+> # 모두에게 접근 허용(로그인 여부 판단 안함)
+> @permission_classes((AllowAny, ))
+> def user_signup(request):
+>     serializer = UserCreationSerializer(data=request.data)
+>     if serializer.is_valid(raise_exception=True):
+>         user = serializer.save()
+>         user.set_password(request.data.get('password'))
+>         user.save()
+>         # print(serializer.data)
+>         return Response({'message': '회원가입이 성공적으로 완료되었습니다.'})
+> 
+> @api_view(['GET'])
+> def user_detail(request, id):
+>     user = get_object_or_404(User, pk=id)
+>     if request.user != user:
+>         # return Response(status=403) 
+>         # 클라이언트는 콘텐츠에 접근할 권리를 가지고 있지 않음. 
+>         # 401과 다르게 403은 클라이언트가 누구인지 알고 있다. 
+>         # (인증은 맞지만 권한이 없는 유저)
+>         return HttpResponseForbidden()
+>     serializer = UserSerializer(user)
+>     return Response(serializer.data)
+> 
+> ```
+
+
+
+
+
+## :large_blue_circle: Vue <=> Django
+
+- 직접적으로 통신하는 것은 Hoem.vue 여기서 TodoList.vue로 올려줄 것
+
+
+
+##### :large_blue_diamond: READ
+
+###### todo-front/src/components/TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'TodoList',
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- todolist를 보여줄 새로운 component를 기본 틀 작성
+
+
+
+```bash
+$ npm i jwt-decode
+```
+
+- 디코드 라이브러리 설치
+- 유저정보만 decode해서 가져와야 함
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+    <TodoList/>
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import router from '../router'
+import TodoList from '@/components/TodoList'
+import axios from 'axios'
+import jwtDecode from 'jwt-decode'
+
+export default {
+  name: 'home',
+  components: {
+    TodoList,
+  },
+  data() {
+    return {
+      todos: [], // 여기에 todolist 가 올 것
+    }
+  },
+  methods: {
+    checkLoggedIn() {
+      this.$session.start()
+      if (!this.$session.has('jwt')) { // 인증된 사용자가 아니라면
+        router.push('/login') // 로그인 폼으로 보낼 것
+      }
+    },
+    getTodos() {
+      this.$session.start()
+      const token = this.$session.get('jwt')
+      const requestHeader = {
+        headers: {
+          Authorization: 'JWT ' + token //JMT(공백)
+        }
+      }
+      // axios를 하기 전에
+      const user_id = jwtDecode(token).user_id
+      console.log(jwtDecode(token))
+      axios.get(`http://127.0.0.1:8000/api/v1/users/${user_id}/`, requestHeader)
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+  },
+  // DOM 에 Vue instance 가 mount 될 때마다 checkLoggedIn 이 실행되어 로그인 여부를 체크
+  mounted () {
+    this.checkLoggedIn()
+    this.getTodos()
+  },
+}
+</script>
+
+```
+
+![image](https://user-images.githubusercontent.com/52684457/69121041-96f6de00-0ade-11ea-8a0e-ce891dec052b.png)
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+    <!-- 왼쪽, 자식리스트(props) 오른쪽, 받는 todos -->
+    <TodoList :todos="todos" /> 
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import router from '../router'
+import TodoList from '@/components/TodoList'
+import axios from 'axios'
+import jwtDecode from 'jwt-decode'
+
+export default {
+  name: 'home',
+  components: {
+    TodoList,
+  },
+  data() {
+    return {
+      todos: [], // 여기에 todolist 가 올 것
+    }
+  },
+  methods: {
+    checkLoggedIn() {
+      this.$session.start()
+      if (!this.$session.has('jwt')) { // 인증된 사용자가 아니라면
+        router.push('/login') // 로그인 폼으로 보낼 것
+      }
+    },
+    getTodos() {
+      this.$session.start()
+      const token = this.$session.get('jwt')
+      const requestHeader = {
+        headers: {
+          Authorization: 'JWT ' + token //JMT(공백)
+        }
+      }
+      // axios를 하기 전에
+      const user_id = jwtDecode(token).user_id
+      console.log(jwtDecode(token))
+      axios.get(`http://127.0.0.1:8000/api/v1/users/${user_id}/`, requestHeader)
+      .then(res => {
+        console.log(res)
+        this.todos = res.data.todo_set
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    }
+  },
+  // DOM 에 Vue instance 가 mount 될 때마다 checkLoggedIn 이 실행되어 로그인 여부를 체크
+  mounted () {
+    this.checkLoggedIn()
+    this.getTodos()
+  },
+}
+</script>
+```
+
+
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <div class="card" v-for="todo in todos" :key="todo.id">
+    <div class="card-body">
+      <span>{{ todo.title }}</span>
+    </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'TodoList',
+    props: {
+      todos: {
+        type: Array,
+        required: true,
+      }
+    }
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+##### :large_blue_diamond: CREATE
+
+###### todo-front/src/components/TodoInput
+
+```vue
+<template>
+  <div class="todo-input">
+    <form class="input-group mb-3">
+      <input type="text" class="form-control">
+      <button type="submit" class="btn btn-primary mx-2">+</button>
+    </form>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'TodoInput',
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+    <TodoInput/>
+    <TodoList :todos="todos" /> 
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import router from '../router'
+import TodoList from '@/components/TodoList'
+import TodoInput from '@/components/TodoInput'
+
+import axios from 'axios'
+import jwtDecode from 'jwt-decode'
+
+export default {
+  name: 'home',
+  components: {
+    TodoList,
+    TodoInput,
+  },
+    ...
+```
+
+- component 등록, 태그 추가
+
+
+
+###### TodoInput.vue
+
+```vue
+<template>
+  <div class="todo-input">
+    <form class="input-group mb-3" @submit.prevent="createTodo"> <!-- prevent : 기본적인 리다이렉트를 막음 -->
+      <input type="text" class="form-control" v-model="title">
+      <button type="submit" class="btn btn-primary mx-2">+</button>
+    </form>
+  </div>
+</template>
+
+<script>
+  export default {
+    name: 'TodoInput',
+    data() {
+      return {
+        title: '' // empty
+      }
+    },
+    methods: {
+      createTodo() {
+        this.$emit('createTodo', this.title)
+        this.title = '' // 보내고 난 후 초기화
+      }
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+
+
+
+
+#### FormData
+
+- 기존 키에 새로운 값을 추가하거나 키가 없는 경우 새로운 키를 추가. (`FormData.append()`)
+- `FormData.append(name, value)` 
+- **name** : value 에 포함되는 데이터 필드 이름
+- **value** : 필드 값
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+    <!-- 왼쪽, 자식리스트(props) 오른쪽, 받는 todos -->
+    <TodoInput @createTodo="createTodo"/> <!-- 왼쪽 : 부모 component에서 실행할 method, 오른쪽 : 받아온 데이터-->
+    <TodoList :todos="todos" /> 
+  </div>
+</template>
+
+<script>
+// @ is an alias to /src
+import router from '../router'
+import TodoList from '@/components/TodoList'
+import TodoInput from '@/components/TodoInput'
+
+import axios from 'axios'
+import jwtDecode from 'jwt-decode'
+
+export default {
+  name: 'home',
+  components: {
+    TodoList,
+    TodoInput,
+  },
+  data() {
+    return {
+      todos: [], // 여기에 todolist 가 올 것
+    }
+  },
+  methods: {
+    checkLoggedIn() {
+      this.$session.start()
+      if (!this.$session.has('jwt')) { // 인증된 사용자가 아니라면
+        router.push('/login') // 로그인 폼으로 보낼 것
+      }
+    },
+    getTodos() {
+      this.$session.start()
+      const token = this.$session.get('jwt')
+      const requestHeader = {
+        headers: {
+          Authorization: 'JWT ' + token //JMT(공백)
+        }
+      }
+      // axios를 하기 전에
+      const user_id = jwtDecode(token).user_id
+      console.log(jwtDecode(token))
+      axios.get(`http://127.0.0.1:8000/api/v1/users/${user_id}/`, requestHeader)
+      .then(res => {
+        console.log(res)
+        this.todos = res.data.todo_set
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    },
+    createTodo(title) {
+      this.$session.start() // 세션 활성화
+      const token = this.$session.get('jwt')
+      const requestHeader = {
+        headers: {
+          Authorization: 'JWT '+token
+        }
+      }
+      const user_id = jwtDecode(token).user_id
+      const requestForm = new FormData()
+
+      // Postman의 body로 들어가는 코드
+      requestForm.append('user', user_id)
+      requestForm.append('title', title) // createTodo 의 title (자식이 보낸 인자)
+
+       axios.post('http://127.0.0.1:8000/api/v1/todos/', requestForm, requestHeader)
+        .then(res => {
+          this.todos.push(res.data)
+          console.log(res)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+  },
+  // DOM 에 Vue instance 가 mount 될 때마다 checkLoggedIn 이 실행되어 로그인 여부를 체크
+  mounted () {
+    this.checkLoggedIn()
+    this.getTodos()
+  },
+}
+</script>
+```
+
+
+
+##### :large_blue_diamond: UPDATE & DELETE
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

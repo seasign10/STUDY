@@ -5903,9 +5903,975 @@ export default {
 
 ##### :large_blue_diamond: UPDATE & DELETE
 
+- DELETE
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <div class="card" v-for="todo in todos" :key="todo.id">
+    <div class="card-body">
+      <span>{{ todo.title }}</span>
+      <span @click="deleteTodo(todo)">🗑️</span>
+    </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    name: 'TodoList',
+    props: {
+      todos: {
+        type: Array,
+        required: true,
+      },
+    },
+    methods: {
+      deleteTodo(todo) {
+        this.$session.start()
+        const token = this.$session.get('jwt')
+        const requestHeader = {
+          headers: {
+            Authorization: 'JWT ' + token
+          }
+        }
+        axios.delete(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestHeader)
+        .then(res => {
+          console.log(res)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      }
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- **[Winodw Emoji](https://emojipedia.org/wastebasket/)**
+
+![image](https://user-images.githubusercontent.com/52684457/69198013-a590d400-0b76-11ea-8e43-ade186975fe2.png)
+
+- 쓰레기통 버튼을 누르면 요청한 url( <u>`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestHeader</u> )과 빈 값의 data를 확인 가능 (삭제가 되었기 때문에 빈 값)
+
+- 하지만 아직 실시간으로 반영이 되지 않는다.
+
+  **=>** Array 에서 특정 아이템을 삭제
+
+#####  **`splice()`** 
+
+- 배열의 기존 요소를 삭제 혹은 교체하거나 새 요소를 추가하여 배열의 내용을 변경
+
+**문법** 
+
+- `Array.splice(시작 index, 삭제할 요소 수, 배열에 추가할 요소)`
+
+- `splice(start, deleteCount, [item1, item2, item3...])`
+
+  1. ##### start
+
+     - 배열의 변경을 시작할 index
+     - 배열의 길이보다 큰 값이면 시작 인덱스틑 배열의 길이로 설정
+     - 음수인 경우 배열의 가장 마지막에서 시작
+     - 절대 값이 배열의 길이보다 큰 경우는 0으로 설정
+
+  2. ##### deleteCount
+
+     - 배열에서 제거할 요소의 수
+     - 생략할 경우 start 부터 모든 요소를 제거
+     - 0 이하인 경우 어떤 요소도 삭제하지 않음. 이때는 최소한 하나의 추가할 새로운 요소 지정
+
+  3. ##### item1, item2, item3...
+
+     - 비열에 추가할 요소
+     - 추가할 아무 요소도 지정하지 않으면 요소를 제거만 한다.
+     - 즉, 추가할 요소를 지정하지 않으면 원본 배열의 특정 인덱스에서 몇개의 요소를 삭제 할지 정한다.
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <div class="card" v-for="todo in todos" :key="todo.id">
+    <div class="card-body">
+      <span>{{ todo.title }}</span>
+      <span @click="deleteTodo(todo)">🗑️</span>
+    </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    name: 'TodoList',
+    props: {
+      todos: {
+        type: Array,
+        required: true,
+      },
+    },
+    methods: {
+      deleteTodo(todo) {
+        this.$session.start()
+        const token = this.$session.get('jwt')
+        const requestHeader = {
+          headers: {
+            Authorization: 'JWT ' + token
+          }
+        }
+        axios.delete(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestHeader)
+        .then(res => {
+          console.log(res)
+          const targetTodo =  this.todos.find(function(el) {
+            return el === todo // element와 todo의 배열과 같은것을 return
+          })
+          const idx = this.todos.indexOf(targetTodo) // targetTodo 의 index
+          if (idx > -1) {
+            this.todos.splice(idx, 1)
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      },
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- 서버를 껐다 켜면, 바로 삭제가되는 것을 확인 가능하다.
+- 당시 `Note that the development build is not optimized.
+    To create a production build, run npm run build.` 문구가 떠서 run build를 했더니 콘솔의 오류가 없어 졌다.
 
 
 
+- UPDATE
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <div class="card" v-for="todo in todos" :key="todo.id">
+    <div class="card-body">
+      <span @click="updateTodo(todo)" :class="{complete: todo.completed }">{{ todo.title }}</span>
+      <span @click="deleteTodo(todo)">🗑️</span>
+    </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    name: 'TodoList',
+    props: {
+      todos: {
+        type: Array,
+        required: true,
+      },
+    },
+    methods: {
+      deleteTodo(todo) {
+        this.$session.start()
+        const token = this.$session.get('jwt')
+        const requestHeader = {
+          headers: {
+            Authorization: 'JWT ' + token
+          }
+        }
+        axios.delete(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestHeader)
+        .then(res => {
+          console.log(res)
+          const targetTodo =  this.todos.find(function(el) {
+            return el === todo // element와 todo의 배열과 같은것을 return
+          })
+          const idx = this.todos.indexOf(targetTodo) // targetTodo 의 index
+          if (idx > -1) {
+            this.todos.splice(idx, 1)
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
+      },
+      updateTodo(todo) {
+        this.$session.start()
+        const token = this.$session.get('jwt')
+        const requestHeader = {
+          headers: {
+            Authorization: 'JWT ' + token
+          }
+        }
+        const requestForm = new FormData()
+        // 수정 전 기존 로직에서 데이터를 보내고 FormData에 담아야 한다.
+        requestForm.append('id', todo.id)
+        requestForm.append('title', todo.title)
+        requestForm.append('user', todo.user)
+        requestForm.append('completed', !todo.completed) // true | false기 때문에 ! (즉각 반영하기 위함)
+        
+        axios.put(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestForm, requestHeader)
+          .then(res => {
+            console.log(res)
+            todo.completed = !todo.completed
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
+    },
+  }
+</script>
+
+<style>
+.complete {
+  text-decoration: line-through;
+  color: rgb(146, 143, 143);
+}
+</style>
+```
+
+- `todo.completed = !todo.completed` 구문을 넣지 않으면 화면에 바로 반영이 되지 않는다.
+
+- 이제 텍스트를 클릭하면 바로 ~~중앙선~~ 이 생기면서 흐릿해진다.
+  **=>** \<style>
+
+ 
+
+#### :large_blue_diamond: Logout
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app" class="container">
+    <div id="nav">
+      <router-link to="/">Home</router-link> |
+      <router-link to="/login">Login</router-link> |
+      <a @click.prevent="logout" href="#">Logout</a> <!-- prevent로 로그아웃 메서드만 작동하도록 -->
+    </div>
+    <div class="row justify-content-center">
+      <router-view class="col-6"/>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  methods: {
+    logout() {
+      this.$session.destroy()
+      this.$router.push('/login')
+    }
+  },
+}
+</script>
+
+<style>
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
+}
+</style>
+```
+
+- 로그인 여부에 따른 메뉴 바가 달라져야 할 필요가 있을 것 같다.
+
+
+
+##### `update`
+
+타입
+
+- function
+
+상세
+
+- 데이터가 변경되어 DOM이 re-render 되고 patch 되면 호출된다.
+  (DOM 변화에 반응)
+- DOM의 변화는 일반적으로 데이터의 변경에 의해 re-render 되는 시점에 일어난다.
+- 데이터의 변화(상태의 변화)에 반응하기 위해서는 computed 나 watch를 사용하는 것이 좋다.
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app" class="container">
+    <div id="nav">
+      <!-- router 속성 안의 to로 인해 연결 -->
+      <div v-if="isAuthenticated">
+        <router-link to="/">Home</router-link> |
+        <a @click.prevent="logout" href="#">Logout</a> <!-- prevent로 로그아웃 메서드만 작동하도록 -->
+      </div>
+      <div v-else>
+        <router-link to="/login">Login</router-link>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <router-view class="col-6"/>
+  </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  data() {
+    return {
+      isAuthenticated: this.$session.has('jwt')
+    }
+  },
+  updated () {
+    // DOM 이 re-render 될 때 다시 토큰의 존재 여부를 확인
+    this.isAuthenticated = this.$session.has('jwt')
+  },
+  methods: {
+    logout() {
+      this.$session.destroy()
+      this.$router.push('/login')
+    }
+  },
+}
+</script>
+
+<style>
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
+}
+</style>
+```
+
+- div 태그 닫는것을 주의하자.
+
+
+
+### :blue_heart: Vuex
+
+- Status 관리를 위해 탄생
+- 컴포넌트 간의 통신 혹은 데이터 전달을 유기적으로 관리
+- 컴포터는 간의 통신 혹은 이벤트 등의 관계를 한곳에서 관리하기 쉽게 구조화
+
+```
+현재 todo 프로젝트에서는 Auth 정보(로그인 혹은 로그아웃)은 django로 요청을 보낼 때 항상 필요하기 때문에, 결국 요청을 수행하는 모든 컴포넌트에서 알고 있어야 하고 그 정보를 내가 필요한 순간에 활용할 수 있어야 한다.
+```
+
+> 1. state
+>    - 상태(데이터)
+> 2. Getters
+>    - computed
+> 3. Mutations
+>    - methods
+>    - state를 변경하기 위해서 반드시 동기적은 method 만 사용 가능 (비동기 함수는 쓸 수 없음)
+>    - 첫번째 인자는 항상 state, 호출은 commit 으로
+> 4. Actions
+>    - 모든 methods
+>    - 비동기 처리가 가능한 methods
+>    - **주의 사항** : mutations와 구분된 이유는 다양한 컴포넌트에서 vuex 를 통해 상태과니, 메서드 호출 등을 하게 될텐데 그 때 동기와 비동기를 구분하기 위해, 
+>    - 첫번째 인자는 항상 context(state/commit/dispatch 등), 호출은 dispatch로 된다.
+
+
+
+- vue ui를 켜서 공식 vuex 플러그인 설치
+- src 폴더 내에 store라는 폴더가 생성된것을 확인가능
+
+- store 폴더 내에 modules라는 파일을 생성 후 그 안에 auth.js 파일 생성
+
+###### sotre/index.js
+
+```js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import auth from './modules/auth'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  modules: {
+    auth,
+  }
+})
+```
+
+
+
+###### store/auth.js
+
+```js
+import jwtDecode from 'jwt-decode'
+
+const state = { // 동기적 함수
+  token = null, // 처음에는 토큰이 없으므로
+}
+
+// data(state) 를 변경하지 않음
+// data 를 원본 그대로 혹은 가공된 데이터를 사용
+const getters = {
+  isLoggedIn: function(state) {
+    // state 토큰에 따라 로그인이 되어있는지 안되어있는지 만드는 함수
+    return state.token ? true : false
+  },
+  requestHeader: function(state) {
+    return {
+      headers: {
+        Authorization: 'JWT' + state.token
+      }
+    }
+  },
+  userId: function(state) {
+    return state.token ? jwtDecode(state.token).user_id : null // 있을때만 user.id를 가져오고, 없으면 null
+  }
+}
+
+// 상태(토큰)을 받아와서 state를 update
+const mutations = {
+  setToken: function(state, token) {
+    state.token = token // 새로받은 토큰을 할당 (state.token이 인자의 token)
+  },
+}
+
+// 비동기 로직 (axtios 로 django 서버에 로그인 / 로그아웃 요청)
+const actions = {
+  // commit은 첫번째 인자로 mutations에 정의한 함수를 받는다.
+  // 두번째 인자로 토큰을 받아서, mutations에 정의 된 함수를 통해 state를 변경한다.
+  login: function(options, token) {
+    options.commit('setToken', token)
+  },
+  // 로그아웃의 경우 추가로 받는 인자는 없고 token의 상태를 null로 변경
+  logout: function(options) {
+    options.commit('setToken')
+  }
+}
+
+export default {
+  state,
+  mutations,
+  actions,
+  getters,
+}
+```
+
+
+
+###### auth.js
+
+```js
+import jwtDecode from 'jwt-decode'
+
+const state = { // 동기적 함수
+  token: null, // 처음에는 토큰이 없으므로
+  loading: false,
+}
+
+// data(state) 를 변경하지 않음
+// data 를 원본 그대로 혹은 가공된 데이터를 사용
+const getters = {
+  isLoggedIn: function(state) {
+    // state 토큰에 따라 로그인이 되어있는지 안되어있는지 만드는 함수
+    return state.token ? true : false
+    // 있을때만 user.id를 가져오고, 없으면 null
+  },
+  requestHeader: function(state) {
+    return {
+      headers: {
+        Authorization: 'JWT ' + state.token
+      }
+    }
+  },
+  userId: function(state) {
+    return state.token ? jwtDecode(state.token).user_id : null
+  }
+}
+
+
+// 상태(토큰)을 받아와서 state 를 update
+const mutations = {
+  setToken: function(state, token) {
+    state.token = token
+  },
+  setLoading:function(state, status) {
+    state.loading = status
+  }
+}
+
+// 비동기 로직 (axtios 로 django 서버에 로그인 / 로그아웃 요청)
+//  options
+// action 에서 사용할 수 있도록 만든 객체 /vuex 에서 제공하는 actions 함수에서 사용할 수 있는 option 들이 있는 객체
+const actions = {
+  // commit은 첫번째 인자로 mutations에 정의한 함수를 받는다.
+  // 두번째 인자로 토큰을 받아서, mutations에 정의 된 함수를 통해 state를 변경한다.
+  login: function(options, token) {
+    options.commit('setToken', token)
+  },
+  // 로그아웃의 경우 추가로 받는 인자는 없고 token 의 상태를 null 로 변경
+  logout: function(options) {
+    options.commit('setToken')
+  },
+  startLoading: function(options) {
+    options.commit('setLoading', true)
+  },
+  endLoading: function(options) {
+    options.commit('setLoading', false)
+  }
+}
+
+
+export default {
+  state,
+  mutations,
+  actions,
+  getters,
+}
+```
+
+- auth.js 가 준비 되었으면 필요없는 코드를 줄일 수 있다.
+
+
+
+###### App.vue
+
+```vue
+<template>
+  <div id="app" class="container">
+    <div id="nav">
+      <div v-if="isLoggedIn">
+        <router-link to="/">Home</router-link> |
+        <a @click.prevent="logout" href="#">Logout</a>
+      </div>
+      <div v-else>
+        <router-link to="/login">Login</router-link>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <router-view class="col-6"/>
+  </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+  // data() {
+  //   return {
+  //     isAuthenticated: this.$session.has('jwt')
+  //   }
+  // },
+  computed: {
+    isLoggedIn: function() {
+      return this.$store.getters.isLoggedIn
+    }
+  },
+  // updated () {
+  //   // DOM 이 re-render 될 때 다시 토큰의 존재 여부를 확인
+  //   this.isAuthenticated = this.$session.has('jwt')
+  // },
+  methods: {
+    logout() {
+      // this.$session.destroy()
+      // 지우는 것이 아닌, action으로 로그아웃을 구현해 놓음
+      this.$store.dispatch('logout')
+      this.$router.push('/login')
+    }
+  },
+}
+</script>
+
+<style>
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
+}
+</style>
+```
+
+
+
+###### Home.vue
+
+```vue
+<template>
+  <div class="home">
+    <h1>Todo with Django</h1>
+    <!-- 왼쪽 : 부모 component에서 실행할 method, 오른쪽 : 받아온 데이터-->
+    <TodoInput @createTodo="createTodo"/>
+    <!-- 왼쪽, 자식리스트(props) 오른쪽, 받는 todos -->
+    <TodoList :todos="todos" />
+  </div>
+</template>
+
+<script>
+import router from '../router'
+import TodoList from '@/components/TodoList'
+import TodoInput from '@/components/TodoInput'
+
+import axios from 'axios'
+// import jwtDecode from 'jwt-decode'
+import { mapGetters } from 'vuex'
+
+export default {
+  name: 'home',
+  components: {
+    TodoList, TodoInput
+  },
+  data() {
+    return {
+      todos: [], // 여기에 todolist 가 올 것
+    }
+  },
+  computed: {
+    // spread 문법 => 각각의 getters
+    // mapGetthers 함수의 인자로 들어가는 배열에는 getters 에서 정의한 함수들 중에서 가지고 오고 싶은 getter 들을 작성
+    // mapGetters : vuex에서 제공하는 특수메서드, ... : (배열을 가져오는 축약어)
+    ...mapGetters([
+      'isLoggedIn',
+      'requestHeader',
+      'userId'
+    ])
+  },
+  methods: {
+    checkLoggedIn() {
+      // this.$session.start()
+      if (!this.isLoggedIn) {
+        router.push('/login')
+      }
+    },
+    getTodos() {
+      // this.$session.start()
+      // const token = this.$session.get('jwt')
+      // const requestHeader = {
+      //   headers: {
+      //     Authorization: 'JWT ' + token
+      //   }
+      // }
+      // const user_id = jwtDecode(token).user_id
+      axios.get(`http://127.0.0.1:8000/api/v1/users/${this.userId}/`, this.requestHeader)
+        .then(res => {
+          console.log(res)
+          this.todos = res.data.todo_set
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    },
+    createTodo(title) {
+      // this.$session.start()
+      // const token = this.$session.get('jwt')
+      // const requestHeader = {
+      //   headers: {
+      //     Authorization: 'JWT ' + token
+      //   }
+      // }
+      // const user_id = jwtDecode(token).user_id
+      const requestForm = new FormData()
+      // Postman의 body로 들어가는 코드
+      requestForm.append('user', this.userId)
+      requestForm.append('title', title) // createTodo 의 title (자식이 보낸 인자)
+
+      axios.post('http://127.0.0.1:8000/api/v1/todos/', requestForm, this.requestHeader)
+        .then(res => {
+          this.todos.push(res.data)
+          console.log(res)
+        })
+        .catch(err => {
+          console.log(err)
+        })
+    }
+  },
+  // DOM 에 Vue instance 가 mount 될 때마다 checkLoggedIn 이 실행되어 로그인 여부를 체크
+  mounted() {
+    this.checkLoggedIn(),
+    this.getTodos()
+  },
+}
+</script>
+```
+
+
+
+###### TodoList.vue
+
+```vue
+<template>
+  <div class="todo-list">
+    <div class="card" v-for="todo in todos" :key="todo.id">
+      <div class="card-body">
+        <span @click="updateTodo(todo)" :class="{ complete: todo.completed }">{{ todo.title }}</span>
+        <span @click="deleteTodo(todo)">🗑️</span>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import axios from 'axios'
+
+  export default {
+    name: 'TodoList',
+    props: {
+      todos: {
+        type: Array,
+        required: true,
+      },
+    },
+    computed: {
+      requestHeader: function() {
+        return this.$store.getters.requestHeader
+      }
+    },
+    methods: {
+      deleteTodo(todo) {
+        // this.$session.start()
+        // const token = this.$session.get('jwt')
+        // const requestHeader = {
+        //   headers: {
+        //     Authorization: 'JWT ' + token
+        //   }
+        // }
+        axios.delete(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, this.requestHeader)
+          .then(res => {
+            console.log(res)
+            const tartgetTodo = this.todos.find(function(el) {
+              return el === todo // element와 todo의 배열과 같은것을 return
+            })
+            const idx = this.todos.indexOf(tartgetTodo) // targetTodo 의 index
+            if (idx > -1) {
+              this.todos.splice(idx, 1)
+            }
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      },
+      updateTodo(todo) {
+        // this.$session.start()
+        // const token = this.$session.get('jwt')
+        // const requestHeader = {
+        //   headers: {
+        //     Authorization: 'JWT ' + token
+        //   }
+        // }
+        const requestForm = new FormData()
+        requestForm.append('id', todo.id)
+        requestForm.append('title', todo.title)
+        requestForm.append('user', todo.user)
+        requestForm.append('completed', !todo.completed) // true | false기 때문에 ! (즉각 반영하기 위함)
+
+        axios.put(`http://127.0.0.1:8000/api/v1/todos/${todo.id}/`, requestForm, this.requestHeader)
+          .then(res => {
+            console.log(res)
+            todo.completed = !todo.completed
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
+    },
+  }
+</script>
+
+<style>
+.complete {
+  text-decoration: line-through;
+  color: rgb(112, 112, 112)
+}
+</style>
+
+```
+
+
+
+###### LoginForm.vue
+
+```vue
+<template>
+  <div class="login-div">
+    <div v-if="loading" class="spinner-border" role="status">
+
+      <!-- screen reader only 시각 장애인에게 로딩중인 것을 알려주는 것, 우리들 눈에는 none screen으로 보임 -->
+      <span class="sr-only">Loading...</span>
+    </div>
+
+    <!-- prevent => 기본적인 활동으로 redirect하게 하지 않은 것 -->
+    <form v-else class="login-form" @submit.prevent="login">
+      <div v-if="errors.length" class="error-list alert alert-danger" role="alert">
+        <!-- errors 값이 true값 이라면 -->
+        <h4>다음의 오류를 해결해주세요.</h4>
+        <hr>
+        <!-- 키값이 필요하기 때문에 enumerate 형식으로 써주어야 함 -->
+        <div v-for="(error, idx) in errors" :key="idx">{{ error }}</div>
+      </div>
+
+      <div class="form-group">
+        <label for="id">ID</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          id="id" 
+          placeholder="아이디를 입력해주세요."
+          v-model="credentials.username"
+          >
+      </div>
+      <div class="form-group">
+        <label for="password">PASSWORD</label>
+        <input 
+          type="password" 
+          class="form-control"
+          id="password" 
+          placeholder="비밀번호를 입력해주세요."
+          v-model="credentials.password"
+          >
+      </div>
+      <button type="submit" class="btn btn-primary">로그인</button>
+    </form>
+  </div>
+</template>
+
+<script>
+  import axios from 'axios'
+  import router from '../router'
+
+  export default {
+    name: 'LoginForm',
+    data() {
+      return { // 객체로 해야 네임스페이스, 즉 충돌이 되지않고 공간이 나눠진다.
+        credentials: {
+          username: '',
+          password: '',
+        },
+        // loading: false,
+        errors: [],
+      }
+    },
+    computed: {
+      loading: function() {
+        return this.$store.state.loading
+      }
+    },
+    methods: {
+      login() {
+        if (this.checkForm()) {
+          // 알아서 바뀔 것이기 때문에 이제 필요 x
+          // this.loading = true
+          this.$store.dispatch('startLoading') // startLoading => true로 바꿔줌 
+          axios.post('http://127.0.0.1:8000/api-token-auth/', this.credentials)
+          .then(res => {
+            // this.$session.start()
+            // this.$session.set('jwt', res.data.token)
+            this.$store.dispatch('endLoading')
+            this.$store.dispatch('login', res.data.token)
+            // 로그인 후 메인 페이지로 이동하게 되는 것 
+            router.push('/')
+          })
+          .catch(err => {
+            // this.loading = false
+            this.$store.dispatch('endLoading')
+            console.log(err)
+          })
+        } else {
+          console.log('로그인 검증 실패')
+        }
+      },
+      checkForm() {
+        // error 에 누적되어있는 값을 초기화
+        this.errors = []
+
+        // 검증 form
+        // id를 입력하지 않는 경우 (비어있는 경우)
+        if (!this.credentials.username) {
+          this.errors.push("아이디를 입력해주세요.")
+        }
+        // if (this.credentials.password.length < 8) {
+        //   this.errors.push("비밀번호는 8자 이상 입력해주세요.")
+        // }
+        if (this.errors.length === 0) {
+          return true
+        }
+      }
+    },
+  }
+</script>
+
+<style>
+
+</style>
+```
+
+- vue session을 사용하다가 store로 바꾸었기 때문에 session이 유지되지 않는다. 그렇기 때문에 새로고침(F5)를 하면 로그아웃이 된다.
+- 세션이 하는 역할을 전부 vuex로 바꾸어서 이러한 현상이 일어나는 것
+
+
+
+##### `vue-session`
+
+- vuex 는 `vue-session`의 대체가 아니고 서로 하는 일이 다름
+
+- vuex 는 메서드와 data의 대체라고 생각
 
 
 

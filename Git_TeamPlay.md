@@ -10,7 +10,7 @@ $ git commit -m "커밋 이름" # commit
 $ git push -u origin master # push
 ```
 
-- 기초 작업
+- 기초 작업 
 
 
 
@@ -18,7 +18,7 @@ $ git push -u origin master # push
 
 
 
-- 중앙 주소에서 포크를 가져온 후, 작업 할 때
+- 중앙 주소에서 포크를 가져온 후, 작업 할 때 
 
 ```bash
 $ git clone 포크 주소

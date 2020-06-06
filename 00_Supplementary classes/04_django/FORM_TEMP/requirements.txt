@@ -3,7 +3,7 @@ backcall==0.1.0
 beautifulsoup4==4.8.1
 colorama==0.4.1
 decorator==4.4.1
-Django==2.2.6
+Django==2.2.13
 django-bootstrap4==1.0.1
 ipython==7.9.0
 ipython-genutils==0.2.0
